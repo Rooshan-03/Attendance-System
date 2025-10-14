@@ -11,8 +11,7 @@ const Login = ({ navigation }) => {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
-
-    // Add your login logic here (API call, Firebase, etc.)
+    
     Alert.alert('Success', 'Login successful!');
   };
 
