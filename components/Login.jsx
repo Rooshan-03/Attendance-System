@@ -4,13 +4,15 @@ import AppIcon from '../assets/AppIcon.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from 'firebase.config';
 import userLoggedInState from 'zustand/store';
+import { get, getDatabase, ref } from 'firebase/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false)
   // Zunstand Hook
-  const { setUserState } = userLoggedInState()
+  const { setUserState, checkUserState } = userLoggedInState()
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill all fields');
@@ -24,15 +26,41 @@ const Login = ({ navigation }) => {
       await signInWithEmailAndPassword(auth, email, password)
       Alert.alert('Succcess!', "Login Successfull")
       setLoading(false)
-      setUserState();
+      setUserState(true);
+      console.log(checkUserState())
+      getDataFromRTDB();
       navigation.navigate('Home')
     } catch (error) {
       setLoading(false)
-      let message = 'Login failed. Please check your credentials.';
+      let message;
       if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
       if (error.code === 'auth/user-not-found') message = 'No user found with this email.';
       if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
       Alert.alert('Error', message);
+    }
+  }
+  const getDataFromRTDB = async () => {
+    try {
+      const uid = auth.currentUser.uid
+      const db = getDatabase();
+      const snapshot = await get(ref(db, 'Users'));
+      if (snapshot.exists()) {
+        const users = snapshot.val()
+        const user = Object.values(users).find(u => u.uid === uid)
+        if (user) {
+          storeDataInAsyncStorage(user)
+        }
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const storeDataInAsyncStorage = async (user) => {
+    try {
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      console.log("data fetched and stored", user)
+    } catch (error) {
+      console.log(error)
     }
   }
   return (
@@ -40,7 +68,7 @@ const Login = ({ navigation }) => {
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#f3f4f6' }}
     >
       <View className="bg-white p-6 rounded-xl shadow-md">
-        {/* Center only the App Icon */}
+        
         <View className="items-center mb-6">
           <Image
             source={AppIcon}
