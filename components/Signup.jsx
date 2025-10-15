@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image, Acti
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import AppIcon from '../assets/AppIcon.png';
 import { auth } from '../firebase.config';
-import { getDatabase, ref, push, set } from 'firebase/database';
+import { getDatabase, ref, set } from 'firebase/database';
 
 const Signup = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -50,8 +50,7 @@ const Signup = ({ navigation }) => {
     try {
       const db = getDatabase()
       const uid = auth.currentUser.uid
-      const newRef = push(ref(db, `Users/${uid}`))
-      await set(newRef, data)
+      await set(ref(db,`Users/${uid}`),data)      
       setLoading(false)
       setConfirmPassword('')
       setEmail('')

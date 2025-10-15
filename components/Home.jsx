@@ -47,7 +47,7 @@ const Home = () => {
                 RollNo: roll
             };
 
-            await set(newStudentRef, studentData); 
+            await set(newStudentRef, studentData);
             setStudents((prev) => [...prev, { id: newStudentRef.key, ...studentData }]);
             setName('');
             setRoll('');
@@ -71,6 +71,8 @@ const Home = () => {
     return (
         <View>
             <Button title='Add Student' onPress={() => { setModalVisible(true) }} />
+
+            {/* Custom Dialoug for adding student */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -114,6 +116,7 @@ const Home = () => {
                     </View>
                 </View>
             </Modal>
+             {/* Displaying Students  */}
             <FlatList
                 data={students}
                 keyExtractor={(item) => item.id}

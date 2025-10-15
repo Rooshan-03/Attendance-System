@@ -23,7 +23,13 @@ const Login = ({ navigation }) => {
   const loginUser = async (email, password) => {
     try {
       setLoading(true)
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredientail = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredientail.user
+      if (!user.emailVerified) {
+        setLoading(false)
+        Alert.alert('Email No Verified', 'Please Verify Email Before Logging In')
+        return
+      }
       Alert.alert('Succcess!', "Login Successfull")
       setLoading(false)
       setUserState(true);
@@ -32,7 +38,7 @@ const Login = ({ navigation }) => {
       navigation.navigate('Home')
     } catch (error) {
       setLoading(false)
-      let message;
+      let message = "Something Went Wrong";
       if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
       if (error.code === 'auth/user-not-found') message = 'No user found with this email.';
       if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
@@ -68,7 +74,7 @@ const Login = ({ navigation }) => {
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, backgroundColor: '#f3f4f6' }}
     >
       <View className="bg-white p-6 rounded-xl shadow-md">
-        
+
         <View className="items-center mb-6">
           <Image
             source={AppIcon}
