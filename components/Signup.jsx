@@ -36,8 +36,7 @@ const Signup = ({ navigation }) => {
         const data = {
           name,
           email,
-          number,
-          uid: userCredential.user.uid,
+          number
         };
         await storeDataInFirebase(data)
       }
@@ -50,7 +49,8 @@ const Signup = ({ navigation }) => {
   const storeDataInFirebase = async (data) => {
     try {
       const db = getDatabase()
-      const newRef = push(ref(db, 'Users'))
+      const uid = auth.currentUser.uid
+      const newRef = push(ref(db, `Users/${uid}`))
       await set(newRef, data)
       setLoading(false)
       setConfirmPassword('')
