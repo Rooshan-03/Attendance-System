@@ -58,6 +58,7 @@ const Signup = ({ navigation }) => {
       setName('')
       setNumber('')
       setPassword('')
+      Alert.alert('Verify Email',"PLease Verify Your email to proceed")
       navigation.navigate('Login')
     } catch (error) {
       console.log('Error: ', error.message)
@@ -93,6 +94,7 @@ const Signup = ({ navigation }) => {
           className="border border-gray-300 rounded-lg p-3 mb-4"
           placeholder="Enter your Gmail"
           keyboardType="email-address"
+          autoCapitalize='none'
           value={email}
           onChangeText={setEmail}
         />
