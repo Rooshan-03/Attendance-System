@@ -53,7 +53,6 @@ const ClassData = ({ navigation }) => {
     }, [navigation, className]);
     // Adding Subjects inside classes Path
     const handleSubmitSubject = async () => {
-
         try {
             if (!subjectName.trim()) {
                 alert('Please Enter Subject Name:')
@@ -78,22 +77,22 @@ const ClassData = ({ navigation }) => {
             console.message(error)
         }
     }
-  const RenderSubjects = ({ item }) => (
-  <TouchableOpacity
-    className="mx-3 my-2 bg-white rounded-2xl shadow-md flex-row items-center p-4 active:opacity-80"
-    onPress={() => console.log('Subject pressed:', item.subjectName)}
-  >
-    <View className="w-10 h-10 bg-blue-100 rounded-full justify-center items-center mr-3">
-      <Ionicons name="book-outline" size={22} color="#2563EB" />
-    </View>
+    const RenderSubjects = ({ item }) => (
+        <TouchableOpacity
+            className="mx-3 my-2 bg-white rounded-2xl shadow-md flex-row items-center p-4"
+            onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName , classId})}
+        >
+            <View className="w-10 h-10 bg-blue-100 rounded-full justify-center items-center mr-3">
+                <Ionicons name="book-outline" size={22} color="#2563EB" />
+            </View>
 
-    <View className="flex-1">
-      <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
-    </View>
+            <View className="flex-1">
+                <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
+            </View>
 
-    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-  </TouchableOpacity>
-);
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+    );
 
 
 

@@ -8,6 +8,7 @@ import './global.css';
 import Home from 'components/Home';
 import SplashScreen from 'components/SplashScreen';
 import ClassData from 'components/ClassData';
+import StudentsData from 'components/StudentsData';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -37,6 +38,11 @@ export default function App() {
         <Stack.Screen 
         name = 'ClassData'
         component={ClassData}
+        options={{headerBackVisible:false}}
+        />
+        <Stack.Screen 
+        name = 'StudentsData'
+        component={StudentsData}
         options={{headerBackVisible:false}}
         />
       </Stack.Navigator>
