@@ -1,15 +1,43 @@
-import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
+import { FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from 'firebase.config';
-import { getDatabase, push, ref, set } from 'firebase/database';
+import { get, getDatabase, push, ref, set } from 'firebase/database';
 
 const ClassData = ({ navigation }) => {
-    const [modalVisible, setModalVisible] = useState('')
+    //useState Hooks for managing states
+    const [modalVisible, setModalVisible] = useState(false)
     const [subjectName, setSubjectName] = useState('')
+    const [subjects, setSubjects] = useState([])
     const [loadingSubmit, setLoadingSubmit] = useState(false)
     const [loadingAddMore, setLoadingAddMore] = useState(false)
+    // fetching data in useEffexct Hook
+    useEffect(() => {
+        //fetching data from firebase
+        const fetchSubjects = async () => {
+            try {
+                const uid = auth.currentUser.uid
+                if (!uid) {
+                    return;
+                }
+                const db = getDatabase()
+                const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects`))
+                if (snapshot.exists()) {
+                    const subjectArray = Object.entries(snapshot.val()).map(([key, value]) => ({
+                        id: key,
+                        ...value,
+                    }))
+                    setSubjects(subjectArray)
+                } else {
+                    setSubjects([])
+                }
+            } catch (error) {
+                console.log('Error Fetcing Subjects', error)
+            }
+        }
+        fetchSubjects();
+    }, [])
     //Getting ClassName as prop from Home Screen
     const { className, classId } = useRoute().params
     // Using Classame as title and also displaying + on top to add subject
@@ -23,7 +51,7 @@ const ClassData = ({ navigation }) => {
             )
         });
     }, [navigation, className]);
-
+    // Adding Subjects inside classes Path
     const handleSubmitSubject = async () => {
 
         try {
@@ -41,7 +69,7 @@ const ClassData = ({ navigation }) => {
             const newSubjectRef = push(ref(db, `Users/${uid}/Classes/${classId}/Subjects`))
             const newSubjectData = { subjectName }
             await set(newSubjectRef, newSubjectData)
-            setSubjectName((prev) => [...prev, { id: newSubjectRef.key, ...newSubjectData }])
+            setSubjects((prev) => [...prev, { id: newSubjectRef.key, ...newSubjectData }])
             setModalVisible(false);
             setLoadingSubmit(false)
             setLoadingAddMore(false)
@@ -50,6 +78,24 @@ const ClassData = ({ navigation }) => {
             console.message(error)
         }
     }
+  const RenderSubjects = ({ item }) => (
+  <TouchableOpacity
+    className="mx-3 my-2 bg-white rounded-2xl shadow-md flex-row items-center p-4 active:opacity-80"
+    onPress={() => console.log('Subject pressed:', item.subjectName)}
+  >
+    <View className="w-10 h-10 bg-blue-100 rounded-full justify-center items-center mr-3">
+      <Ionicons name="book-outline" size={22} color="#2563EB" />
+    </View>
+
+    <View className="flex-1">
+      <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
+    </View>
+
+    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+  </TouchableOpacity>
+);
+
+
 
     return (
         <View>
@@ -103,9 +149,13 @@ const ClassData = ({ navigation }) => {
                             <Text className="text-white text-center font-bold">Cancel</Text>
                         </TouchableOpacity>
                     </View>
-
                 </View>
             </Modal>
+            <FlatList
+                data={subjects}
+                keyExtractor={(item) => item.id}
+                renderItem={RenderSubjects}
+            />
         </View>
     )
 }
