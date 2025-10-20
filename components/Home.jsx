@@ -81,7 +81,7 @@ const Home = ({ navigation }) => {
   const RenderClass = ({ item }) => (
   <TouchableOpacity
     className="bg-white shadow-md rounded-xl p-4 m-2 flex-row justify-between items-center"
-    onPress={() => navigation.navigate('ClassData', { className: item.className })}
+    onPress={() => navigation.navigate('ClassData', { className: item.className , classId: item.id})}
   >
     <Text className="text-base">📘 {item.className}</Text>
   </TouchableOpacity>
