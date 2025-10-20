@@ -14,6 +14,7 @@ const StudentsData = ({ navigation }) => {
     const [loadingAddMore, setLoadingAddMore] = useState(false)
     //getting id and subject name using props from ClassDAta Screen
     const { classId, subjectId, subjectName } = useRoute().params
+    const uid = auth.currentUser.uid
     //Header Setting
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -74,15 +75,12 @@ const StudentsData = ({ navigation }) => {
             setRoll('');
             setLoadingSubmit(false)
             setLoadingAddMore(false)
-            setModalVisible(false);
 
         } catch (error) {
             console.log('Error adding student:', error);
         }
     };
-    //Render Students
-
-
+    //Render Students   
     const RenderStudents = ({ item }) => {
         return (
             <View className="bg-white mx-4 my-2 p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-center">
@@ -102,9 +100,10 @@ const StudentsData = ({ navigation }) => {
             </View>
         )
     }
+
     return (
         <View>
-
+            <Button title='Mark Attendance' onPress={() => navigation.navigate('MarkAttendance', {uid,subjectId,classId})} />
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -127,8 +126,7 @@ const StudentsData = ({ navigation }) => {
                         <TextInput
                             placeholder="Roll Number"
                             value={roll}
-                            onChangeText={setRoll}
-                            keyboardType="numeric"
+                            onChangeText={setRoll}  
                             className="w-full border border-gray-300 rounded-md px-3 py-2 mb-3"
                         />
 
@@ -137,8 +135,7 @@ const StudentsData = ({ navigation }) => {
                             <TouchableOpacity
                                 className="w-[48%] bg-green-500 rounded-md py-2 mb-2"
                                 onPress={async () => {
-                                    await handleSubmit();
-                                    setModalVisible(true);
+                                    await handleSubmit();   
                                 }}
                             >{loadingAddMore ? (
                                 <ActivityIndicator size="small" color="#192130" />
@@ -177,6 +174,7 @@ const StudentsData = ({ navigation }) => {
                 renderItem={RenderStudents}
                 ListEmptyComponent={<Text style={{ padding: 20 }}>Loading students...</Text>}
             />
+
         </View>
 
     )

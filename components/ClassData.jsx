@@ -107,7 +107,7 @@ const ClassData = ({ navigation }) => {
                     <View className='w-4/5 bg-white rounded-lg items-center p-6'>
                         <Text className="text-lg font-bold mb-4 text-center">Enter Subject Name</Text>
                         <TextInput
-                            placeholder='Suvject'
+                            placeholder='Subject'
                             value={subjectName}
                             onChangeText={setSubjectName}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 mb-3"
