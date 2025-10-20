@@ -7,6 +7,7 @@ import Signup from 'components/Signup';
 import './global.css';
 import Home from 'components/Home';
 import SplashScreen from 'components/SplashScreen';
+import ClassData from 'components/ClassData';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -31,7 +32,12 @@ export default function App() {
         <Stack.Screen 
         name = 'Home'
         component={Home}
-        options={{title:'Home Screen',headerBackVisible:false}}
+        options={{title:'Classes',headerBackVisible:false}}
+        />
+        <Stack.Screen 
+        name = 'ClassData'
+        component={ClassData}
+        options={{headerBackVisible:false}}
         />
       </Stack.Navigator>
     </NavigationContainer>

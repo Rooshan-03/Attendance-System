@@ -1,78 +1,94 @@
-import { View, Text, ScrollView, FlatList, Button, Modal, TextInput, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { auth } from 'firebase.config'
-import { get, getDatabase, ref, push, set } from 'firebase/database'
-const Home = () => {
-    const [students, setStudents] = useState([])
+import React, { useEffect, useState, useLayoutEffect } from 'react';
+import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { auth } from 'firebase.config';
+import { get, getDatabase, ref, push, set } from 'firebase/database';
+import { Ionicons } from '@expo/vector-icons';
+
+const Home = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [name, setName] = useState('');
-    const [roll, setRoll] = useState('');
+    const [className, setClassName] = useState('');
+    const [classes, setClasses] = useState([]);
+    const [loadingSubmit, setLoadingSubmit] = useState(false)
+    const [loadingAddMore, setLoadingAddMore] = useState(false)
     useEffect(() => {
-        const fetchStudents = async () => {
+        const fetchClasses = async () => {
             try {
-                const uid = auth.currentUser.uid;
-                if (!uid) {
-                    return
-                }
-                const db = getDatabase()
-                const snapshot = await get(ref(db, `Users/${uid}/Students`))
+                const uid = auth.currentUser?.uid;
+                if (!uid) return;
+                const db = getDatabase();
+                const snapshot = await get(ref(db, `Users/${uid}/Classes`));
                 if (snapshot.exists()) {
-                    const studentsArray = Object.entries(snapshot.val()).map(([key, value]) => ({
+                    const classesArray = Object.entries(snapshot.val()).map(([key, value]) => ({
                         id: key,
                         ...value,
                     }));
-                    setStudents(studentsArray)
-                }
-                else {
-                    console.log('Error', 'No students Found')
+                    setClasses(classesArray);
+                } else {
+                    setClasses([]);
                 }
             } catch (error) {
-                console.log('Error', error)
+                console.log('Error fetching classes:', error);
             }
-        }
-        fetchStudents();
-    }, [])
+        };
+        fetchClasses();
+    }, []);
+
     const handleSubmit = async () => {
-        if (!name || !roll) {
-            alert('Please enter both name and roll number');
+        if (!className.trim()) {
+            alert('Please enter a class name');
             return;
         }
+        setLoadingSubmit(true)
+        setLoadingAddMore(true)
         try {
-            const uid = auth.currentUser.uid;
+            if (classes.some(c => c.className.toLowerCase() === className.trim().toLowerCase())) {
+                alert('This class already exists!');
+                setLoadingSubmit(false)
+                setLoadingAddMore(false)
+
+                return;
+            }
+            const uid = auth.currentUser?.uid;
+            if (!uid) return;
             const db = getDatabase();
-            const newStudentRef = push(ref(db, `Users/${uid}/Students`));
+            const newClassRef = push(ref(db, `Users/${uid}/Classes`));
+            const newClassData = { className };
 
-            const studentData = {
-                Name: name,
-                RollNo: roll
-            };
+            await set(newClassRef, newClassData);
 
-            await set(newStudentRef, studentData);
-            setStudents((prev) => [...prev, { id: newStudentRef.key, ...studentData }]);
-            setName('');
-            setRoll('');
+            setClasses((prev) => [...prev, { id: newClassRef.key, ...newClassData }]);
+            setClassName('');
             setModalVisible(false);
+            setLoadingSubmit(false)
+            setLoadingAddMore(false)
 
         } catch (error) {
-            console.log('Error adding student:', error);
+            setLoadingSubmit(false)
+            console.log('Error adding class:', error);
         }
     };
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={{ marginRight: 15 }}>
+                    <Ionicons name="add" size={28} color="blue" />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation]);
 
+  const RenderClass = ({ item }) => (
+  <TouchableOpacity
+    className="bg-white shadow-md rounded-xl p-4 m-2 flex-row justify-between items-center"
+    onPress={() => navigation.navigate('ClassData', { className: item.className })}
+  >
+    <Text className="text-base">📘 {item.className}</Text>
+  </TouchableOpacity>
+);
 
-    const RenderStudents = ({ item }) => {
-        return (
-            <View style={{ padding: 15, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-                <Text>Name: {item.Name}</Text>
-                <Text>Roll No: {item.RollNo}</Text>
-            </View>
-        )
-    }
     return (
-        <View>
-            <Button title='Add Student' onPress={() => { setModalVisible(true) }} />
-
-            {/* Custom Dialoug for adding student */}
+        <View style={{ flex: 1 }}>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -81,31 +97,42 @@ const Home = () => {
             >
                 <View className="flex-1 justify-center items-center bg-black/50">
                     <View className="w-4/5 bg-white rounded-lg p-6 items-center">
-                        <Text className="text-lg font-bold mb-4 text-center">
-                            Enter Name and Roll Number
-                        </Text>
+                        <Text className="text-lg font-bold mb-4 text-center">Enter Class Name:</Text>
 
                         <TextInput
-                            placeholder="Name"
-                            value={name}
-                            onChangeText={setName}
+                            placeholder="Class Name"
+                            value={className}
+                            onChangeText={setClassName}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 mb-3"
                         />
+                        <View className="flex-row justify-between w-full">
 
-                        <TextInput
-                            placeholder="Roll Number"
-                            value={roll}
-                            onChangeText={setRoll}
-                            keyboardType="numeric"
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 mb-3"
-                        />
+                            <TouchableOpacity
+                                className="w-[48%] bg-green-500 rounded-md py-2 mb-2"
+                                onPress={async () => {
+                                    await handleSubmit();
+                                    setModalVisible(true);
+                                }}
+                            >{loadingAddMore ? (
+                                <ActivityIndicator size="small" color="#192130" />
+                            ) : (
+                                <Text className="text-white text-center font-bold">Add More</Text>
+                            )}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                className="w-[48%] bg-blue-500 rounded-md py-2 mb-2"
+                                onPress={async () => {
+                                    await handleSubmit();
+                                    setModalVisible(false);
+                                }}                            >
+                                {loadingSubmit ? (
+                                    <ActivityIndicator size="small" color="#192130" />
+                                ) : (
+                                    <Text className="text-white text-center font-bold">Submit</Text>
+                                )}
+                            </TouchableOpacity>
 
-                        <TouchableOpacity
-                            className="w-full bg-blue-500 rounded-md py-2 mb-2"
-                            onPress={handleSubmit}
-                        >
-                            <Text className="text-white text-center font-bold">Submit</Text>
-                        </TouchableOpacity>
+                        </View>
 
                         <TouchableOpacity
                             className="w-full bg-gray-400 rounded-md py-2"
@@ -116,16 +143,21 @@ const Home = () => {
                     </View>
                 </View>
             </Modal>
-             {/* Displaying Students  */}
-            <FlatList
-                data={students}
-                keyExtractor={(item) => item.id}
-                renderItem={RenderStudents}
-                ListEmptyComponent={<Text style={{ padding: 20 }}>Loading students...</Text>}
 
+            {/* Class List */}
+            <FlatList
+                data={classes}
+                keyExtractor={(item) => item.id}
+                renderItem={RenderClass}
+                contentContainerStyle={{ flex: 1 }}  
+                ListEmptyComponent={
+                    <View className='flex-1  items-center justify-center'> 
+                        <Text className='text-red-500 font-extrabold text-xl'>No Classes Yet..</Text>
+                    </View>
+                }
             />
         </View>
-    )
-}
+    );
+};
 
-export default Home
+export default Home;
