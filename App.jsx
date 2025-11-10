@@ -10,6 +10,7 @@ import SplashScreen from 'components/SplashScreen';
 import ClassData from 'components/ClassData';
 import StudentsData from 'components/StudentsData';
 import MarkAttendance from 'components/MarkAttendance';
+import ShowAttendance from 'components/ShowAttendance';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -49,6 +50,11 @@ export default function App() {
         <Stack.Screen 
         name = 'MarkAttendance'
         component={MarkAttendance}
+        options={{headerBackVisible:false}}
+        />
+         <Stack.Screen 
+        name = 'ShowAttendance'
+        component={ShowAttendance}
         options={{headerBackVisible:false}}
         />
       </Stack.Navigator>

@@ -1,11 +1,12 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { get, getDatabase, ref } from 'firebase/database'
+import { get, getDatabase, ref, update } from 'firebase/database'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute } from '@react-navigation/native'
-import SafeAreaView from 'react-native-safe-area-context'
-const MarkAttendance = () => {
+
+const MarkAttendance = ({ navigation }) => {
     const [students, setStudents] = useState([])
+    const [loading, setLoading] = useState(false);
     const { uid, classId, subjectId } = useRoute().params
     useEffect(() => {
         const fetchStudents = async () => {
@@ -54,34 +55,72 @@ const MarkAttendance = () => {
             </View>
         )
     }
+    const getReadableDate = () => {
+        const d = new Date();
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
     const submitAttendance = async () => {
+        setLoading(true);
         const db = getDatabase();
+        const Date = getReadableDate();
+        const todayRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Attendance/${Date}`)
+        const snapshot = await get(todayRef)
+        if (snapshot.exists()) {
+            setLoading(false)
+            alert(`Attendance Taken For ${Date}`)
+            navigation.navigate('ShowAttendance')
+            return
+        }
+        const updates = {};
         students.forEach(student => {
-            set(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students/${student.id}/Attendance/${Date.now()}`), {
+            updates[`Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Attendance/${Date}/${student.id}`] = {
+                name: student.Name,
+                rollNo: student.RollNo,
                 present: student.present
-            });
+            };
         });
-        alert('Attendance marked successfully!');
+
+        try {
+
+            await update(ref(db), updates);
+            setLoading(false)
+            alert('Attendance marked successfully!');
+            navigation.navigate('ShowAttendance')
+        } catch (error) {
+            setLoading(false)
+            console.error("Error marking attendance:", error);
+            alert('Failed to mark attendance.');
+        }
     };
 
     return (
-        <SafeAreaView className="flex-1 items-center justify-end">
-            <FlatList
-                data={students}
-                renderItem={RenderItem}
-                keyExtractor={item => item.id}
-                className="flex-1 w-full"
-                contentContainerStyle={{ paddingBottom: 30 }}
-            />
+        loading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" />
+            </View>
+        )
+            : (
+                <View className="flex-1 items-center justify-end">
+                    <FlatList
+                        data={students}
+                        renderItem={RenderItem}
+                        keyExtractor={item => item.id}
+                        className="flex-1 w-full"
+                        contentContainerStyle={{ paddingBottom: 30 }}
+                    />
 
-            <TouchableOpacity className="bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg mb-10" onPress={submitAttendance}>
-                <Text className="text-white font-bold text-2xl">
-                    Submit Attendance
-                </Text>
-            </TouchableOpacity>
-        </SafeAreaView>
+                    <TouchableOpacity className="bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg mb-10" onPress={submitAttendance}>
+                        <Text className="text-white font-bold text-2xl">
+                            Submit Attendance
+                        </Text>
+                    </TouchableOpacity>
 
+                </View>
+            )
     )
 }
 
-export default MarkAttendance
+export default MarkAttendance;
