@@ -3,13 +3,19 @@ import React, { useEffect, useState } from 'react'
 import { get, getDatabase, ref, update } from 'firebase/database'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute } from '@react-navigation/native'
+import { auth } from 'firebase.config'
 
 const MarkAttendance = ({ navigation }) => {
     const [students, setStudents] = useState([])
     const [loading, setLoading] = useState(false);
+    //getting id and subject name using props from StudentsData Screen
     const { uid, classId, subjectId } = useRoute().params
     useEffect(() => {
         const fetchStudents = async () => {
+            const uid = auth.currentUser.uid;
+            if (!uid) {
+                return
+            }
             const db = getDatabase()
             const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
             if (snapshot.exists()) {
@@ -71,7 +77,7 @@ const MarkAttendance = ({ navigation }) => {
         if (snapshot.exists()) {
             setLoading(false)
             alert(`Attendance Taken For ${Date}`)
-            navigation.navigate('ShowAttendance')
+            navigation.navigate('ShowAttendance', { uid, subjectId, classId })
             return
         }
         const updates = {};
@@ -88,7 +94,7 @@ const MarkAttendance = ({ navigation }) => {
             await update(ref(db), updates);
             setLoading(false)
             alert('Attendance marked successfully!');
-            navigation.navigate('ShowAttendance')
+            navigation.navigate('ShowAttendance', { uid, subjectId, classId })
         } catch (error) {
             setLoading(false)
             console.error("Error marking attendance:", error);
@@ -98,7 +104,7 @@ const MarkAttendance = ({ navigation }) => {
 
     return (
         loading ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <View className='flex-1 justify-center items-center'>
                 <ActivityIndicator size="large" />
             </View>
         )
