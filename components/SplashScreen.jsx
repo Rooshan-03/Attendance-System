@@ -1,6 +1,6 @@
 import { View, Image } from 'react-native'
 import React, { useEffect } from 'react'
-import AppIcon from '../assets/AppIcon.png';
+import AppIcon from '../assets/AppIcon.jpeg';
 import userLoggedInState from 'zustand/store';
 
 const SplashScreen = ({ navigation }) => {

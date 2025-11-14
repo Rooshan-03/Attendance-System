@@ -18,12 +18,7 @@ const StudentsData = ({ navigation }) => {
     //Header Setting
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: subjectName,
-            headerRight: () => (
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Ionicons name='add' size={28} color='blue' />
-                </TouchableOpacity>
-            )
+            title: subjectName
         })
     })
     //UseEffect
@@ -83,7 +78,7 @@ const StudentsData = ({ navigation }) => {
     //Render Students   
     const RenderStudents = ({ item }) => {
         return (
-            <View className="bg-white mx-4 my-2 p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-center">
+            <View className="bg-white mx-4 my-2 p-2 rounded-2xl shadow-sm border border-gray-100 flex-row items-center">
                 {/* Icon */}
                 <View className="bg-blue-100 p-3 rounded-full mr-4">
                     <Ionicons name="person-circle-outline" size={28} color="#2563EB" />
@@ -95,15 +90,13 @@ const StudentsData = ({ navigation }) => {
                     <Text className="text-sm text-gray-500 mt-1">Roll No: {item.RollNo}</Text>
                 </View>
 
-                {/* Optional Right Icon */}
-                <Ionicons name="chevron-forward-outline" size={22} color="#9CA3AF" />
             </View>
         )
     }
 
     return (
         <View>
-            <Button title='Mark Attendance' onPress={() => navigation.navigate('MarkAttendance', {uid,subjectId,classId})} />
+
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -126,7 +119,7 @@ const StudentsData = ({ navigation }) => {
                         <TextInput
                             placeholder="Roll Number"
                             value={roll}
-                            onChangeText={setRoll}  
+                            onChangeText={setRoll}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 mb-3"
                         />
 
@@ -135,7 +128,7 @@ const StudentsData = ({ navigation }) => {
                             <TouchableOpacity
                                 className="w-[48%] bg-green-500 rounded-md py-2 mb-2"
                                 onPress={async () => {
-                                    await handleSubmit();   
+                                    await handleSubmit();
                                 }}
                             >{loadingAddMore ? (
                                 <ActivityIndicator size="small" color="#192130" />
@@ -172,9 +165,21 @@ const StudentsData = ({ navigation }) => {
                 data={students}
                 keyExtractor={(item) => item.id}
                 renderItem={RenderStudents}
-                ListEmptyComponent={<Text style={{ padding: 20 }}>Loading students...</Text>}
+                className='mb-20'
+                ListEmptyComponent={<Text style={{ padding: 20, flex:1, justifyContent:'center', alignItems:'center'}}>Loading students...</Text>}
             />
-
+            <TouchableOpacity className="w-30 h-15 absolute bottom-44 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={()=>setModalVisible(true)}>
+                <View className='flex justify-center items-center flex-row'>
+                    <Ionicons name='add' size={15} color={'#fff'} />
+                    <Text className='text-sm ml-2 text-white font-bold'>Add </Text>
+                </View>
+            </TouchableOpacity>
+             <TouchableOpacity className="w-30 h-15 absolute bottom-28 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId })}>
+                <View className='flex justify-center items-center flex-row'>
+                    <Ionicons name='checkmark-done-circle-outline' size={15} color={'#fff'} />
+                    <Text className='text-sm ml-2 text-white font-bold'>Mark Attendance</Text>
+                </View>
+            </TouchableOpacity>
         </View>
 
     )

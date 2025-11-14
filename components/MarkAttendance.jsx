@@ -109,21 +109,20 @@ const MarkAttendance = ({ navigation }) => {
             </View>
         )
             : (
-                <View className="flex-1 items-center justify-end">
+                <View className="flex-1 items-center ">
                     <FlatList
                         data={students}
                         renderItem={RenderItem}
                         keyExtractor={item => item.id}
-                        className="flex-1 w-full"
-                        contentContainerStyle={{ paddingBottom: 30 }}
+                        className="w-full h-4/5"
+                        contentContainerStyle={{ paddingBottom: 100 }}
                     />
 
-                    <TouchableOpacity className="bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg mb-10" onPress={submitAttendance}>
-                        <Text className="text-white font-bold text-2xl">
+                    <TouchableOpacity className="absolute bottom-14 bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg" onPress={submitAttendance}>
+                        <Text className="text-white font-semibold text-xl">
                             Submit Attendance
                         </Text>
                     </TouchableOpacity>
-
                 </View>
             )
     )

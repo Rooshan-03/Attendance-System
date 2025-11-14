@@ -1,4 +1,4 @@
-import { FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +12,9 @@ const ClassData = ({ navigation }) => {
     const [subjects, setSubjects] = useState([])
     const [loadingSubmit, setLoadingSubmit] = useState(false)
     const [loadingAddMore, setLoadingAddMore] = useState(false)
+    const [isLoading, setLoading] = useState(true)
+    //Getting ClassName as prop from Home Screen
+    const { className, classId } = useRoute().params
     // fetching data in useEffexct Hook
     useEffect(() => {
         //fetching data from firebase
@@ -19,6 +22,7 @@ const ClassData = ({ navigation }) => {
             try {
                 const uid = auth.currentUser.uid
                 if (!uid) {
+                    setLoading(false)
                     return;
                 }
                 const db = getDatabase()
@@ -28,27 +32,27 @@ const ClassData = ({ navigation }) => {
                         id: key,
                         ...value,
                     }))
+                    setLoading(false)
+
                     setSubjects(subjectArray)
                 } else {
+                    setLoading(false)
+
                     setSubjects([])
                 }
             } catch (error) {
+                setLoading(false)
+
                 console.log('Error Fetcing Subjects', error)
             }
         }
         fetchSubjects();
     }, [])
-    //Getting ClassName as prop from Home Screen
-    const { className, classId } = useRoute().params
+
     // Using Classame as title and also displaying + on top to add subject
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: className || 'Class Data',
-            headerRight: () => (
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Ionicons name='add' size={28} color='blue' />
-                </TouchableOpacity>
-            )
+            title: className || 'Class Data'
         });
     }, [navigation, className]);
     // Adding Subjects inside classes Path
@@ -80,7 +84,7 @@ const ClassData = ({ navigation }) => {
     const RenderSubjects = ({ item }) => (
         <TouchableOpacity
             className="mx-3 my-2 bg-white rounded-2xl shadow-md flex-row items-center p-4"
-            onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName , classId})}
+            onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName, classId })}
         >
             <View className="w-10 h-10 bg-blue-100 rounded-full justify-center items-center mr-3">
                 <Ionicons name="book-outline" size={22} color="#2563EB" />
@@ -97,7 +101,7 @@ const ClassData = ({ navigation }) => {
 
 
     return (
-        <View>
+        <View className='flex-1'>
             <Modal animationType='fade'
                 transparent={true}
                 visible={modalVisible}
@@ -150,11 +154,37 @@ const ClassData = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-            <FlatList
-                data={subjects}
-                keyExtractor={(item) => item.id}
-                renderItem={RenderSubjects}
-            />
+            <View className="flex-1">
+                {isLoading ? (
+                    <View className="flex-1 justify-center items-center">
+                        <ActivityIndicator size={50} color="blue" />
+                    </View>
+                ) : subjects.length === 0 ? (
+                    <View className="flex-1 justify-center items-center">
+                        <Text className="text-red-500 font-extrabold">
+                            No subjects Added Yet
+                        </Text>
+                    </View>
+                ) : (
+                    <View className="flex-1">
+                        <FlatList
+                            data={subjects}
+                            keyExtractor={(item) => item.id}
+                            renderItem={RenderSubjects}
+                            className="flex-1"
+                        />
+                        <TouchableOpacity
+                            className="w-30 h-15 absolute bottom-28 right-10 bg-blue-500 p-4 rounded-lg shadow-lg"
+                            onPress={() => setModalVisible(true)}
+                        >
+                            <View className="flex justify-center items-center flex-row">
+                                <Ionicons name="checkmark-done-circle-outline" size={15} color="#fff" />
+                                <Text className="text-sm ml-2 text-white font-bold">Mark Attendance</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
         </View>
     )
 }

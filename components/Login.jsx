@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
-import AppIcon from '../assets/AppIcon.png';
+import AppIcon from '../assets/AppIcon.jpeg';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from 'firebase.config';
 import userLoggedInState from 'zustand/store';

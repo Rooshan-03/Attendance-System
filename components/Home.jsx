@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { auth } from 'firebase.config';
-import { get, getDatabase, ref, push, set } from 'firebase/database';
+import { getDatabase, ref, push, set, onValue } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
@@ -13,30 +13,31 @@ const Home = ({ navigation }) => {
     const [loadingClasses, setLoadingClasses] = useState(true);
 
     useEffect(() => {
-        const fetchClasses = async () => {
-            try {
-                const uid = auth.currentUser?.uid;
-                if (!uid) return;
-                const db = getDatabase();
-                const snapshot = await get(ref(db, `Users/${uid}/Classes`));
-                if (snapshot.exists()) {
-                    const classesArray = Object.entries(snapshot.val()).map(([key, value]) => ({
-                        id: key,
-                        ...value,
-                    }));
-                    setClasses(classesArray);
-                    setLoadingClasses(false)
-                } else {
-                    setClasses([]);
-                    setLoadingClasses(false)
-                }
-            } catch (error) {
-                setLoadingClasses(false)
-                console.log('Error fetching classes:', error);
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+
+        const db = getDatabase();
+        const classesRef = ref(db, `Users/${uid}/Classes`);
+
+        const unsubscribe = onValue(classesRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const classesArray = Object.entries(snapshot.val()).map(([key, value]) => ({
+                    id: key,
+                    ...value,
+                }));
+                setClasses(classesArray);
+            } else {
+                setClasses([]);
             }
-        };
-        fetchClasses();
+            setLoadingClasses(false);
+        }, (error) => {
+            console.log("Error fetching classes:", error);
+            setLoadingClasses(false);
+        });
+
+        return () => unsubscribe();
     }, []);
+
 
     const handleSubmit = async () => {
         if (!className.trim()) {
@@ -66,16 +67,6 @@ const Home = ({ navigation }) => {
             setLoadingAddMore(false);
         }
     };
-
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity onPress={() => setModalVisible(true)} className="mr-4">
-                    <Ionicons name="add" size={28} color="blue" />
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
 
     const RenderClass = ({ item }) => (
         <TouchableOpacity
@@ -151,17 +142,25 @@ const Home = ({ navigation }) => {
                     <ActivityIndicator size="large" color="blue" />
                 </View>
             ) : (
-                <FlatList
-                    data={classes}
-                    keyExtractor={item => item.id}
-                    renderItem={RenderClass}
-                    contentContainerStyle={classes.length === 0 ? { flex: 1 } : undefined}
-                    ListEmptyComponent={
-                        <View className="flex-1 justify-center items-center">
-                            <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
+                <View>
+                    <FlatList
+                        data={classes}
+                        keyExtractor={item => item.id}
+                        renderItem={RenderClass}
+                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : undefined}
+                        ListEmptyComponent={
+                            <View className="flex-1 justify-center items-center">
+                                <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
+                            </View>
+                        }
+                    />
+                    <TouchableOpacity className="w-30 h-15 absolute bottom-20 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => setModalVisible(true)}>
+                        <View className='flex justify-center items-center flex-row'>
+                            <Ionicons name='add' size={15} color={'#fff'} />
+                            <Text className='text-sm ml-2 text-white font-bold'>Add </Text>
                         </View>
-                    }
-                />
+                    </TouchableOpacity>
+                </View>
             )}
         </View>
     );

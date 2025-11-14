@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import AppIcon from '../assets/AppIcon.png';
+import AppIcon from '../assets/AppIcon.jpeg';
 import { auth } from '../firebase.config';
 import { getDatabase, ref, set } from 'firebase/database';
 

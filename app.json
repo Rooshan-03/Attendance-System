@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "my-expo-app",
+    "name": "Attendly",
     "slug": "my-expo-app",
     "version": "1.0.0",
     "web": {
@@ -13,10 +13,10 @@
       "expo-font"
     ],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/AppIcon.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/AppIcon.jpeg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
