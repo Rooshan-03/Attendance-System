@@ -31,6 +31,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "66299944-99de-4210-8f9e-9784f9b0eaea"
+      }
+    },
+    "owner": "shani_03"
   }
 }

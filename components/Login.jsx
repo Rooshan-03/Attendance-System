@@ -6,11 +6,13 @@ import { auth } from 'firebase.config';
 import userLoggedInState from 'zustand/store';
 import { get, getDatabase, ref } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Ionicons } from '@expo/vector-icons';
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
   // Zunstand Hook
   const { setUserState, checkUserState } = userLoggedInState()
   const handleLogin = () => {
@@ -96,13 +98,25 @@ const Login = ({ navigation }) => {
         />
 
         <Text className="text-gray-700 mb-1">Password</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-6 w-full"
-          placeholder="Enter password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+
+        <View className="border border-gray-300 rounded-lg px-2 mb-6 w-full flex-row items-center">
+          <TextInput
+            className="flex-1"
+            placeholder="Enter password"
+            secureTextEntry={!showPassword}   
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={22}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </View>
+
 
         <TouchableOpacity
           className="bg-blue-500 rounded-lg p-3 w-full"

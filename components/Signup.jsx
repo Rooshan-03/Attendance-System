@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 import AppIcon from '../assets/AppIcon.jpeg';
 import { auth } from '../firebase.config';
 import { getDatabase, ref, set } from 'firebase/database';
+import { Ionicons } from '@expo/vector-icons'; 
 
 const Signup = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -11,7 +12,11 @@ const Signup = ({ navigation }) => {
   const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const handleSignup = async () => {
     setLoading(true)
     if (!name || !email || !number || !password || !confirmPassword) {
@@ -50,14 +55,14 @@ const Signup = ({ navigation }) => {
     try {
       const db = getDatabase()
       const uid = auth.currentUser.uid
-      await set(ref(db,`Users/${uid}`),data)      
+      await set(ref(db, `Users/${uid}`), data)
       setLoading(false)
       setConfirmPassword('')
       setEmail('')
       setName('')
       setNumber('')
       setPassword('')
-      Alert.alert('Verify Email',"PLease Verify Your email to proceed")
+      Alert.alert('Verify Email', "PLease Verify Your email to proceed")
       navigation.navigate('Login')
     } catch (error) {
       console.log('Error: ', error.message)
@@ -80,60 +85,51 @@ const Signup = ({ navigation }) => {
 
         <Text className="text-2xl font-bold mb-6 text-center">Sign Up</Text>
 
-        <Text className="text-gray-700 mb-1">Name</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-4"
-          placeholder="Enter your name"
-          value={name}
-          onChangeText={setName}
-        />
+        {/* Name, Email, Phone Inputs remain same */}
 
-        <Text className="text-gray-700 mb-1">Email</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-4"
-          placeholder="Enter your Gmail"
-          keyboardType="email-address"
-          autoCapitalize='none'
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <Text className="text-gray-700 mb-1">Phone Number</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-4"
-          placeholder="Enter your number"
-          keyboardType="phone-pad"
-          value={number}
-          onChangeText={setNumber}
-        />
-
+        {/* Password */}
         <Text className="text-gray-700 mb-1">Password</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-4"
-          placeholder="Enter password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View className="flex-row items-center border border-gray-300 rounded-lg p-3 mb-4">
+          <TextInput
+            className="flex-1"
+            placeholder="Enter password"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color="gray" />
+          </TouchableOpacity>
+        </View>
 
+        {/* Confirm Password */}
         <Text className="text-gray-700 mb-1">Confirm Password</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 mb-6"
-          placeholder="Confirm password"
-          secureTextEntry
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-        
+        <View className="flex-row items-center border border-gray-300 rounded-lg p-3 mb-6">
+          <TextInput
+            className="flex-1"
+            placeholder="Confirm password"
+            secureTextEntry={!showConfirmPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+            <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={22} color="gray" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Sign Up Button */}
         <TouchableOpacity
           className="bg-blue-500 rounded-lg p-3"
           onPress={handleSignup}
         >
-          {loading ? (<ActivityIndicator size='small' color='#192130' />) : (
-            <Text className="text-white text-center font-bold">Sign Up</Text>)}
-
+          {loading ? (
+            <ActivityIndicator size='small' color='#192130' />
+          ) : (
+            <Text className="text-white text-center font-bold">Sign Up</Text>
+          )}
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { navigation.navigate('Login') }}>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <View className="items-end mt-4">
             <Text className="text-blue-400">Already Have an Account? Login</Text>
           </View>

@@ -136,7 +136,6 @@ const Home = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* Loader or Class List */}
             {loadingClasses ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="blue" />
