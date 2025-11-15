@@ -29,7 +29,7 @@ const ShowAttendance = ({ navigation }) => {
             const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Attendance/${dateStr}`));
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                const students = Object.values(data).filter(student => student.present);
+                const students = Object.values(data);
                 setPresentStudents(students);
             }
             setLoading(false);
@@ -56,8 +56,14 @@ const ShowAttendance = ({ navigation }) => {
                 Alert.alert('No data', 'There are no students to export.');
                 return;
             }
+            const formattedData = presentStudents.map(student => ({
+                Name: student.name,
+                'Roll Number': student.rollNo,
+                Attendance: student.Attendance
+            }));
+
             const sheetName = `${subjectName} ${getReadableDate()}`;
-            const ws = XLSX.utils.json_to_sheet(presentStudents);
+            const ws = XLSX.utils.json_to_sheet(formattedData, { header: ['Name', 'Roll Number', 'Attendance'] });
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
 
@@ -80,13 +86,6 @@ const ShowAttendance = ({ navigation }) => {
         }
     };
 
-    const TableRow = ({ item, isHeader }) => (
-        <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#ccc', padding: 8, backgroundColor: isHeader ? '#eee' : 'white' }}>
-            <Text style={{ flex: 1, fontWeight: 'bold' }}>{isHeader ? 'Name' : item.name}</Text>
-            <Text style={{ flex: 1, fontWeight: 'bold' }}>{isHeader ? 'Roll No' : item.rollNo}</Text>
-            <Text style={{ flex: 1, fontWeight: 'bold' }}>{isHeader ? 'Present' : item.present ? 'Yes' : 'No'}</Text>
-        </View>
-    );
 
     if (isLoading) {
         return (
@@ -95,14 +94,42 @@ const ShowAttendance = ({ navigation }) => {
             </View>
         );
     }
+    const RenderStudents = ({ item }) => {
+        return (
+            <View className="flex-row p-2 border-b border-gray-300 items-center">
+                {/* Name - fixed width or flex basis */}
+                <Text className="w-40 text-xs ps-5 text-left">{item.name}</Text>
+
+                {/* Roll No */}
+                <Text className="w-40 text-xs text-left">{item.rollNo}</Text>
+
+                {/* Attendance */}
+                <Text className="flex-1 text-xs mr-11 text-center">{item.Attendance}</Text>
+            </View>
+        )
+    }
+
 
     return (
         <View className='flex-1'>
+            {/* Header */}
+            <View className="flex-row bg-gray-400 p-2 items-center">
+                <Text className="flex-[0.3] ml-4 text-left font-bold text-white text-sm">
+                    Name
+                </Text>
+                <Text className="flex-[0.3] text-center font-bold text-white text-sm">
+                    Roll No
+                </Text>
+                <Text className="flex-[0.3] ml-4 text-right font-bold text-white text-sm">
+                    Attendance
+                </Text>
+            </View>
+
+
             <FlatList
                 data={presentStudents}
                 keyExtractor={item => item.rollNo.toString()}
-                ListHeaderComponent={<TableRow isHeader />}
-                renderItem={({ item }) => <TableRow item={item} />}
+                renderItem={RenderStudents}
             />
             <TouchableOpacity className="w-30 h-15 absolute bottom-20 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={exportToExcel}>
                 <View className='flex justify-center items-center flex-row'>

@@ -78,16 +78,16 @@ const StudentsData = ({ navigation }) => {
     //Render Students   
     const RenderStudents = ({ item }) => {
         return (
-            <View className="bg-white mx-4 my-2 p-2 rounded-2xl shadow-sm border border-gray-100 flex-row items-center">
+            <View className="bg-white mx-3 my-1 p-2 rounded-xl border border-gray-200 flex-row items-center">
                 {/* Icon */}
-                <View className="bg-blue-100 p-3 rounded-full mr-4">
-                    <Ionicons name="person-circle-outline" size={28} color="#2563EB" />
+                <View className="bg-blue-100 p-2 rounded-full ml-2 mr-4">
+                    <Ionicons name="person-circle-outline" size={20} color="#2563EB" />
                 </View>
 
                 {/* Student Info */}
                 <View className="flex-1">
-                    <Text className="text-lg font-semibold text-gray-800">{item.Name}</Text>
-                    <Text className="text-sm text-gray-500 mt-1">Roll No: {item.RollNo}</Text>
+                    <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
+                    <Text className="text-xs text-gray-500 mt-1">{item.RollNo}</Text>
                 </View>
 
             </View>

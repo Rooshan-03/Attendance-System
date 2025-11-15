@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { auth } from 'firebase.config';
 import { getDatabase, ref, push, set, onValue } from 'firebase/database';
@@ -136,6 +136,7 @@ const Home = ({ navigation }) => {
                 </View>
             </Modal>
 
+
             {loadingClasses ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="blue" />
@@ -146,7 +147,7 @@ const Home = ({ navigation }) => {
                         data={classes}
                         keyExtractor={item => item.id}
                         renderItem={RenderClass}
-                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : undefined}
+                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : {paddingBottom:40}}
                         ListEmptyComponent={
                             <View className="flex-1 justify-center items-center">
                                 <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
@@ -165,4 +166,4 @@ const Home = ({ navigation }) => {
     );
 };
 
-export default Home;    
+export default Home;

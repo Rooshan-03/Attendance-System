@@ -1,9 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { get, getDatabase, ref, update } from 'firebase/database'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute } from '@react-navigation/native'
 import { auth } from 'firebase.config'
+import RadioButton from './RadioButton'
 
 const MarkAttendance = ({ navigation }) => {
     const [students, setStudents] = useState([])
@@ -23,44 +24,69 @@ const MarkAttendance = ({ navigation }) => {
                 const list = Object.entries(data).map(([key, val]) => ({
                     id: key,
                     ...val,
-                    present: true
+                    Attendance: "p"
                 }))
                 setStudents(list)
             }
         }
         fetchStudents()
     }, [])
-    const toggleAttendance = (id) => {
-        setStudents((prev) =>
-            prev.map((student) =>
-                student.id === id ? { ...student, present: !student.present } : student
-            )
-        )
-    }
+
     const RenderItem = ({ item }) => {
+        const updateStatus = (value) => {
+            setStudents(prev =>
+                prev.map(s => s.id == item.id ? { ...s, Attendance: value } : s)
+            )
+        }
         return (
-            <View className="bg-white mx-4 my-2 p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-center">
+            <View className="bg-white mx-3 my-1 p-4 rounded-xl border border-gray-200 flex-row items-center">
                 {/* Icon */}
-                <View className="bg-blue-100 p-3 rounded-full mr-4">
-                    <Ionicons name="person-circle-outline" size={28} color="#2563EB" />
+                <View className="bg-blue-100 p-2 rounded-full mr-4">
+                    <Ionicons name="person-circle-outline" size={20} color="#2563EB" />
                 </View>
 
                 {/* Student Info */}
                 <View className="flex-1">
-                    <Text className="text-lg font-semibold text-gray-800">{item.Name}</Text>
-                    <Text className="text-sm text-gray-500 mt-1">Roll No: {item.RollNo}</Text>
+                    <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
+                    <Text className="text-xs text-gray-500"> {item.RollNo}</Text>
                 </View>
-                <TouchableOpacity
-                    className={`rounded-lg m-2 p-3 ${item.present ? 'bg-green-400' : 'bg-red-500'}`}
-                    onPress={() => toggleAttendance(item.id)}
-                >
-                    <Text className='text-white font-extrabold'>
-                        {item.present ? 'Present' : 'Absent'}
-                    </Text>
-                </TouchableOpacity>
+                <View className='flex justify-center items-center flex-row'>
+                    <RadioButton
+                        label={'P'}
+                        color={'bg-gray-300'}
+                        selectedColor={'bg-green-400'}
+                        onPress={() => { updateStatus("P") }}
+                        selected={item.Attendance === "P"}
+                    />
+                    <RadioButton
+                        label={'A'}
+                        color={'bg-gray-200'}
+                        selectedColor={'bg-red-500'}
+                        onPress={() => { updateStatus("A") }}
+                        selected={item.Attendance === "A"}
+                    />
+                    <RadioButton
+                        label={'L'}
+                        color={'bg-gray-200'}
+                        selectedColor={'bg-blue-400'}
+                        onPress={() => { updateStatus("L") }}
+                        selected={item.Attendance === "L"}
+                    />
+                </View>
             </View>
         )
     }
+    const showDialog = () => {
+        Alert.alert(
+            "Confirmation",
+            "Are you sure you want to Submit Attendance?",
+            [
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: () => submitAttendance() }
+            ],
+            { cancelable: true }
+        );
+    };
     const getReadableDate = () => {
         const d = new Date();
         const day = String(d.getDate()).padStart(2, '0');
@@ -85,7 +111,7 @@ const MarkAttendance = ({ navigation }) => {
             updates[`Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Attendance/${Date}/${student.id}`] = {
                 name: student.Name,
                 rollNo: student.RollNo,
-                present: student.present
+                Attendance: student.Attendance
             };
         });
 
@@ -118,7 +144,7 @@ const MarkAttendance = ({ navigation }) => {
                         contentContainerStyle={{ paddingBottom: 100 }}
                     />
 
-                    <TouchableOpacity className="absolute bottom-14 bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg" onPress={submitAttendance}>
+                    <TouchableOpacity className="absolute bottom-14 bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg" onPress={showDialog}>
                         <Text className="text-white font-semibold text-xl">
                             Submit Attendance
                         </Text>
