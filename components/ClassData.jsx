@@ -178,8 +178,8 @@ const ClassData = ({ navigation }) => {
                             onPress={() => setModalVisible(true)}
                         >
                             <View className="flex justify-center items-center flex-row">
-                                <Ionicons name="checkmark-done-circle-outline" size={15} color="#fff" />
-                                <Text className="text-sm ml-2 text-white font-bold">Mark Attendance</Text>
+                                <Ionicons name="add-circle" size={15} color="#fff" />
+                                <Text className="text-sm ml-2 text-white font-bold">Add</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

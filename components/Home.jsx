@@ -38,7 +38,7 @@ const Home = ({ navigation }) => {
         return () => unsubscribe();
     }, []);
 
-
+    
     const handleSubmit = async () => {
         if (!className.trim()) {
             alert('Please enter a class name');
