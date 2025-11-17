@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { get, getDatabase, ref, update } from 'firebase/database'
 import { Ionicons } from '@expo/vector-icons'
-import { useRoute } from '@react-navigation/native'
+import { useFocusEffect, useRoute } from '@react-navigation/native'
 import { auth } from 'firebase.config'
 import RadioButton from './RadioButton'
 
@@ -11,27 +11,28 @@ const MarkAttendance = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     //getting id and subject name using props from StudentsData Screen
     const { uid, classId, subjectId } = useRoute().params
-    useEffect(() => {
-        const fetchStudents = async () => {
-            const uid = auth.currentUser.uid;
-            if (!uid) {
-                return
+    useFocusEffect(
+        useCallback(() => {
+            const fetchStudents = async () => {
+                const uid = auth.currentUser.uid;
+                if (!uid) {
+                    return
+                }
+                const db = getDatabase()
+                const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
+                if (snapshot.exists()) {
+                    const data = snapshot.val()
+                    const list = Object.entries(data).map(([key, val]) => ({
+                        id: key,
+                        ...val,
+                        Attendance: null
+                    }))
+                    setStudents(list)
+                }
             }
-            const db = getDatabase()
-            const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
-            if (snapshot.exists()) {
-                const data = snapshot.val()
-                const list = Object.entries(data).map(([key, val]) => ({
-                    id: key,
-                    ...val,
-                    Attendance: "p"
-                }))
-                setStudents(list)
-            }
-        }
-        fetchStudents()
-    }, [])
-
+            fetchStudents()
+        }, [])
+    );
     const RenderItem = ({ item }) => {
         const updateStatus = (value) => {
             setStudents(prev =>
@@ -107,6 +108,12 @@ const MarkAttendance = ({ navigation }) => {
             return
         }
         const updates = {};
+        let checkMissingStudents = students.some(s => s.Attendance == null);
+        if (checkMissingStudents) {
+            setLoading(false)
+            Alert.alert("Error", "Please Mark Attendance for All students")
+            return;
+        }
         students.forEach(student => {
             updates[`Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Attendance/${Date}/${student.id}`] = {
                 name: student.Name,

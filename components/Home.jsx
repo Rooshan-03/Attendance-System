@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { auth } from 'firebase.config';
-import { getDatabase, ref, push, set, onValue } from 'firebase/database';
+import { getDatabase, ref, push, set, onValue, get } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
@@ -13,32 +13,30 @@ const Home = ({ navigation }) => {
     const [loadingClasses, setLoadingClasses] = useState(true);
 
     useEffect(() => {
-        const uid = auth.currentUser?.uid;
-        if (!uid) return;
-
         const db = getDatabase();
-        const classesRef = ref(db, `Users/${uid}/Classes`);
-
-        const unsubscribe = onValue(classesRef, (snapshot) => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) {
+            return;
+        }
+        const fetchClasses = async () => {
+            const classesRef = ref(db, `Users/${uid}/Classes`);
+            const snapshot = await get(classesRef)
+            console.log('Fetching Data')
             if (snapshot.exists()) {
                 const classesArray = Object.entries(snapshot.val()).map(([key, value]) => ({
                     id: key,
                     ...value,
-                }));
+                }))
+                setLoadingClasses(false)
+                console.log("Data Fetched")
                 setClasses(classesArray);
             } else {
+                setLoadingClasses(false)
                 setClasses([]);
             }
-            setLoadingClasses(false);
-        }, (error) => {
-            console.log("Error fetching classes:", error);
-            setLoadingClasses(false);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    
+        }
+        fetchClasses()
+    }, [])
     const handleSubmit = async () => {
         if (!className.trim()) {
             alert('Please enter a class name');
@@ -147,7 +145,7 @@ const Home = ({ navigation }) => {
                         data={classes}
                         keyExtractor={item => item.id}
                         renderItem={RenderClass}
-                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : {paddingBottom:40}}
+                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : { paddingBottom: 40 }}
                         ListEmptyComponent={
                             <View className="flex-1 justify-center items-center">
                                 <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
