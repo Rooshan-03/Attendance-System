@@ -1,6 +1,14 @@
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
+const path = require('path');
 
-const config = getDefaultConfig(__dirname);
+// Get Expo's default Metro config
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = withNativeWind(config, { input: './global.css' });
+// Ensure NativeWind knows where your Tailwind input CSS is
+const nativeWindConfig = withNativeWind(defaultConfig, {
+  input: path.resolve(__dirname, 'global.css'),
+});
+
+module.exports = nativeWindConfig;

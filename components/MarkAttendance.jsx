@@ -1,82 +1,60 @@
 import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
-import { get, getDatabase, ref, update } from 'firebase/database'
-import { Ionicons } from '@expo/vector-icons'
+import React, { useCallback, useMemo, useState } from 'react'
+import { get, getDatabase, ref, update } from 'firebase/database';
 import { useFocusEffect, useRoute } from '@react-navigation/native'
 import { auth } from 'firebase.config'
 import RadioButton from './RadioButton'
+import { Ionicons } from '@expo/vector-icons';
 
 const MarkAttendance = ({ navigation }) => {
     const [students, setStudents] = useState([])
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [className, setClassName] = useState('');
     //getting id and subject name using props from StudentsData Screen
-    const { uid, classId, subjectId } = useRoute().params
+    const { classId, subjectId, subjectName } = useRoute().params
+
+    const db = getDatabase()
+    const uid = auth.currentUser.uid
     useFocusEffect(
         useCallback(() => {
-            const fetchStudents = async () => {
-                const uid = auth.currentUser.uid;
-                if (!uid) {
-                    return
-                }
-                const db = getDatabase()
-                const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
-                if (snapshot.exists()) {
-                    const data = snapshot.val()
-                    const list = Object.entries(data).map(([key, val]) => ({
-                        id: key,
-                        ...val,
-                        Attendance: null
-                    }))
-                    setStudents(list)
+            const fetchData = async () => {
+                try {
+                    if (!uid) {
+                        return
+                    }
+                    const subjectSnapshot = await get(ref(db, `Users/${uid}/Classes/${classId}`));
+                    if (subjectSnapshot.exists()) {
+                        console.log('Trying to get Class Name')
+                        setClassName(subjectSnapshot.val().className);
+                        console.log('got Class Name')
+                    }
+                    console.log('Trying to get data')
+                    const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
+                    if (snapshot.exists()) {
+                        const data = snapshot.val()
+                        console.log('Got data')
+                        const list = Object.entries(data).map(([key, val]) => ({
+                            id: key,
+                            ...val,
+                            Attendance: "P"
+                        }))
+                        setStudents(list)
+                        setLoading(false)
+                    }
+                } catch (error) {
+                    Alert.alert("Error", "Something Went Wrong!")
                 }
             }
-            fetchStudents()
+            fetchData()
         }, [])
     );
-    const RenderItem = ({ item }) => {
-        const updateStatus = (value) => {
-            setStudents(prev =>
-                prev.map(s => s.id == item.id ? { ...s, Attendance: value } : s)
-            )
-        }
-        return (
-            <View className="bg-white mx-3 my-1 p-4 rounded-xl border border-gray-200 flex-row items-center">
-                {/* Icon */}
-                <View className="bg-blue-100 p-2 rounded-full mr-4">
-                    <Ionicons name="person-circle-outline" size={20} color="#2563EB" />
-                </View>
+    const updateStatus = useCallback((studentId, value) => {
+        setStudents(prev =>
+            prev.map(s => s.id === studentId ? { ...s, Attendance: value } : s)
+        );
+    }, []);
 
-                {/* Student Info */}
-                <View className="flex-1">
-                    <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
-                    <Text className="text-xs text-gray-500"> {item.RollNo}</Text>
-                </View>
-                <View className='flex justify-center items-center flex-row'>
-                    <RadioButton
-                        label={'P'}
-                        color={'bg-gray-300'}
-                        selectedColor={'bg-green-400'}
-                        onPress={() => { updateStatus("P") }}
-                        selected={item.Attendance === "P"}
-                    />
-                    <RadioButton
-                        label={'A'}
-                        color={'bg-gray-200'}
-                        selectedColor={'bg-red-500'}
-                        onPress={() => { updateStatus("A") }}
-                        selected={item.Attendance === "A"}
-                    />
-                    <RadioButton
-                        label={'L'}
-                        color={'bg-gray-200'}
-                        selectedColor={'bg-blue-400'}
-                        onPress={() => { updateStatus("L") }}
-                        selected={item.Attendance === "L"}
-                    />
-                </View>
-            </View>
-        )
-    }
+
     const showDialog = () => {
         Alert.alert(
             "Confirmation",
@@ -134,30 +112,150 @@ const MarkAttendance = ({ navigation }) => {
             alert('Failed to mark attendance.');
         }
     };
+    const getFormattedTime = () => {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const mins = minutes < 10 ? `0${minutes}` : minutes;
+        return `${hours}:${mins} ${ampm}`;
+    }
+    const present = React.useMemo(() => students.filter(s => s.Attendance === "P").length, [students]);
+    const Absent = React.useMemo(() => students.filter(s => s.Attendance === "A").length, [students]);
+    const Leave = React.useMemo(() => students.filter(s => s.Attendance === "L").length, [students]);
 
+
+    const RenderItem = useMemo(() => {
+        const Item = React.memo(({ item, number }) => {
+            const onP = () => updateStatus(item.id, "P");
+            const onA = () => updateStatus(item.id, "A");
+            const onL = () => updateStatus(item.id, "L");
+            return (
+                <View className="w-full bg-white p-2 flex-row items-center" style={{ borderBottomWidth: 0.3 }}>
+                    <View className=" p-2  mr-4">
+                        <Text>{number + 1}</Text>
+                    </View>
+                    <View className="flex-1 items-center">
+                        <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
+                        <Text className="text-xs text-gray-500"> {item.RollNo}</Text>
+                    </View>
+                    <View className='flex justify-center items-center flex-row'>
+                        <RadioButton
+                            label={'P'}
+                            color={'bg-gray-300'}
+                            textColor={'text-green-700'}
+                            selectedColor={'bg-green-200'}
+                            onPress={onP}
+                            selected={item.Attendance === "P"}
+                        />
+                        <RadioButton
+                            label={'A'}
+                            color={'bg-gray-200'}
+                            selectedColor={'bg-red-200'}
+                            textColor={'text-red-700'}
+                            onPress={onA}
+                            selected={item.Attendance === "A"}
+                        />
+                        <RadioButton
+                            label={'L'}
+                            color={'bg-gray-200'}
+                            selectedColor={'bg-blue-200'}
+                            textColor={'text-blue-700'}
+                            onPress={onL}
+                            selected={item.Attendance === "L"}
+                        />
+                    </View>
+                </View>
+            )
+        })
+        return Item;
+    }, [updateStatus])
     return (
         loading ? (
             <View className='flex-1 justify-center items-center'>
                 <ActivityIndicator size="large" />
             </View>
-        )
-            : (
-                <View className="flex-1 items-center ">
+        ) : (
+            <View className="flex-1 items-center">
+                {/* Top View for Details */}
+                <View className='w-[95%] flex flex-col mt-2 p-2 rounded-xl border border-blue-200 bg-blue-200/90 '>
+                    {/* First row(Class Name and subjectName) */}
+                    <View className='flex flex-row justify-between mx-5'>
+                        <View className='flex flex-row px-3 m-2'>
+                            <Ionicons name='people-outline' className='mx-1' color={'#2563EB'} size={12} />
+                            <Text className='text-xs text-blue-700 font-bold'>{className}</Text>
+                        </View>
+                        <View className='flex flex-row px-3 m-2'>
+                            <Ionicons name='book-outline' className='mx-1' color={'#2563EB'} size={12} />
+                            <Text className='text-xs text-blue-700 font-bold'>{subjectName}</Text>
+                        </View>
+                    </View>
+                    {/* 2nd row time anda date */}
+                    <View className='flex flex-row justify-between mx-5'>
+                        <View className='flex flex-row px-3 m-2'>
+                            <Ionicons name='today-outline' className='mx-1' color={'#2563EB'} size={12} />
+                            <Text className='text-xs text-blue-700 font-bold'>{getReadableDate()}</Text>
+                        </View>
+                        <View className='flex flex-row px-3 m-2'>
+                            <Ionicons name='time-outline' className='mx-1' color={'#2563EB'} size={12} />
+                            <Text className='text-xs text-blue-700 font-bold'>{getFormattedTime()}</Text>
+                        </View>
+                    </View>
+                </View>
+                {/* Attendance Details*/}
+                <View className='w-[95%] flex flex-row mt-2 mx-2 justify-center items-center'>
+                    {/* present students */}
+                    <View className='w-[30%] m-2 h-20 bg-white rounded-lg p-3  '>
+                        <Text className='text-gray-500 font-semibold'>Present</Text>
+                        <View className='mt-3 flex flex-row'>
+                            <View className='w-3 h-3 bg-green-600 rounded-full' />
+                            <Text className='text-xs pl-1'>{present}</Text>
+                        </View>
+                    </View>
+                    {/* Absent Students */}
+                    <View className='w-[30%] m-2 h-20 bg-white rounded-lg p-3'>
+                        <Text className='font-semibold text-gray-500 '>Absent</Text>
+                        <View className='mt-3 flex flex-row'>
+                            <View className='w-3 h-3 bg-red-600 rounded-full' />
+                            <Text className='text-xs pl-1'>{Absent}</Text>
+                        </View>
+                    </View>
+                    {/* Students On loave */}
+                    <View className='w-[30%] m-2 h-20 bg-white rounded-lg p-3'>
+                        <Text className='font-semibold text-gray-500 '>Leave</Text>
+                        <View className='mt-3 flex flex-row'>
+                            <View className='w-3 h-3 bg-blue-600 rounded-full' />
+                            <Text className='text-xs pl-1'>{Leave}</Text>
+                        </View>
+                    </View>
+                </View>
+                {/* Flatlist started */}
+                <View className="w-[90%] h-4/5 mt-3 pb-40" >
                     <FlatList
+                        className='rounded-3xl'
                         data={students}
-                        renderItem={RenderItem}
+                        renderItem={({ item, index }) => (
+                            <RenderItem
+                                item={item}
+                                number={index}
+                            />
+                        )
+                        }
+                        removeClippedSubviews={true}
                         keyExtractor={item => item.id}
-                        className="w-full h-4/5"
-                        contentContainerStyle={{ paddingBottom: 100 }}
                     />
-
-                    <TouchableOpacity className="absolute bottom-14 bg-blue-400 w-11/12 p-2 rounded-lg items-center shadow-lg" onPress={showDialog}>
-                        <Text className="text-white font-semibold text-xl">
+                </View>
+                <View className='bg-white w-full h-28 absolute bottom-0 '>
+                    <TouchableOpacity className="top-0 mx-6 h-12 flex flex-row justify-center bg-blue-400  rounded-md mt-5 items-center" onPress={showDialog}>
+                        <Ionicons name='send' color={"#fff"} size={20} />
+                        <Text className="text-white ml-2 font-sens text-xl">
                             Submit Attendance
                         </Text>
                     </TouchableOpacity>
                 </View>
-            )
+            </View>
+        )
     )
 }
 

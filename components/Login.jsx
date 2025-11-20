@@ -32,6 +32,7 @@ const Login = ({ navigation }) => {
         Alert.alert('Email No Verified', 'Please Verify Email Before Logging In')
         return
       }
+
       Alert.alert('Succcess!', "Login Successfull")
       setLoading(false)
       setUserState(true);
@@ -103,7 +104,7 @@ const Login = ({ navigation }) => {
           <TextInput
             className="flex-1"
             placeholder="Enter password"
-            secureTextEntry={!showPassword}   
+            secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
           />

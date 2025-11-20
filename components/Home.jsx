@@ -13,6 +13,18 @@ const Home = ({ navigation }) => {
     const [loadingClasses, setLoadingClasses] = useState(true);
 
     useEffect(() => {
+
+        navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity className='mx-3' onPress={toggleDrawer}>
+                    <Ionicons name='menu' size={20} />
+                </TouchableOpacity>
+            ),
+            headerTitle:"Classes"
+        }) 
+        const toggleDrawer = ()=>{
+
+        }
         const db = getDatabase();
         const uid = auth.currentUser?.uid;
         if (!uid) {
@@ -68,7 +80,7 @@ const Home = ({ navigation }) => {
 
     const RenderClass = ({ item }) => (
         <TouchableOpacity
-            className="bg-white shadow-md rounded-xl p-4 m-2 flex-row justify-between items-center"
+            className="bg-white rounded-lg p-4 mx-4 my-1 flex-row justify-between items-center"
             onPress={() => navigation.navigate('ClassData', { className: item.className, classId: item.id })}
         >
             <Text className="text-base">📘 {item.className}</Text>
@@ -145,7 +157,7 @@ const Home = ({ navigation }) => {
                         data={classes}
                         keyExtractor={item => item.id}
                         renderItem={RenderClass}
-                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : { paddingBottom: 40 }}
+                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : { paddingBottom: 40 , marginTop:20 }}
                         ListEmptyComponent={
                             <View className="flex-1 justify-center items-center">
                                 <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>

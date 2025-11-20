@@ -76,27 +76,23 @@ const StudentsData = ({ navigation }) => {
         }
     };
     //Render Students   
-    const RenderStudents = ({ item }) => {
+    const RenderStudents = ({ item, number }) => {
         return (
-            <View className="bg-white mx-3 my-1 p-2 rounded-xl border border-gray-200 flex-row items-center">
-                {/* Icon */}
-                <View className="bg-blue-100 p-2 rounded-full ml-2 mr-4">
-                    <Ionicons name="person-circle-outline" size={20} color="#2563EB" />
+            <View className="bg-white mx-4 p-2 flex-row items-center" style={{ borderBottomWidth: 0.5 }}>
+                <View className="p-2 rounded-full ml-2 mr-4">
+                    <Text>{number + 1}</Text>
                 </View>
 
-                {/* Student Info */}
-                <View className="flex-1">
-                    <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
-                    <Text className="text-xs text-gray-500 mt-1">{item.RollNo}</Text>
+                <View className="flex-1 items-center mr-8">
+                    <Text className="text-sm font-sens font-medium text-gray-800">{item.Name}</Text>
+                    <Text className="text-xs font-sens text-gray-500 mt[0.5]">{item.RollNo}</Text>
                 </View>
-
             </View>
         )
     }
 
     return (
-        <View>
-
+        <View className='flex-1'>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -160,28 +156,26 @@ const StudentsData = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
-            {/* Displaying Students  */}
+
             <FlatList
                 data={students}
                 keyExtractor={(item) => item.id}
-                renderItem={RenderStudents}
+                renderItem={({ item, index }) => <RenderStudents item={item} number={index} />}
                 className='mb-20'
-                ListEmptyComponent={<Text style={{ padding: 20, flex:1, justifyContent:'center', alignItems:'center'}}>Loading students...</Text>}
+                ListEmptyComponent={<Text className='p-20 flex-1 justify-center items-start'>Loading students...</Text>}
             />
-            <TouchableOpacity className="w-30 h-15 absolute bottom-44 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={()=>setModalVisible(true)}>
-                <View className='flex justify-center items-center flex-row'>
-                    <Ionicons name='add' size={15} color={'#fff'} />
-                    <Text className='text-sm ml-2 text-white font-bold'>Add </Text>
-                </View>
-            </TouchableOpacity>
-             <TouchableOpacity className="w-30 h-15 absolute bottom-28 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId })}>
-                <View className='flex justify-center items-center flex-row'>
-                    <Ionicons name='checkmark-done-circle-outline' size={15} color={'#fff'} />
-                    <Text className='text-sm ml-2 text-white font-bold'>Mark Attendance</Text>
-                </View>
-            </TouchableOpacity>
+            <View className='absolute bottom-20 right-5'>
+                <TouchableOpacity className="absolut left-10 w-14 h-14 bg-blue-400 p-4 m-2 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
+                    <Ionicons name='add-sharp' size={20} color={'#fff'} />
+                </TouchableOpacity>
+                <TouchableOpacity className="w-30 h-15 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId, subjectName })}>
+                    <View className='flex justify-center items-center flex-row'>
+                        <Ionicons name='checkmark-done-circle-outline' size={15} color={'#fff'} />
+                        <Text className='text-sm ml-2 text-white font-bold'>Mark Attendance</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
         </View>
-
     )
 }
 
