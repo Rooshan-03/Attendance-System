@@ -12,7 +12,7 @@ const Home = ({ navigation }) => {
     const [loadingAddMore, setLoadingAddMore] = useState(false);
     const [loadingClasses, setLoadingClasses] = useState(true);
 
-    useEffect(() => {        
+    useEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
                 <TouchableOpacity className='mx-3' onPress={toggleDrawer}>
@@ -160,11 +160,12 @@ const Home = ({ navigation }) => {
                         renderItem={RenderClass}
                         className='mt-2 h-[92%]'
                     />
-                    <TouchableOpacity className="w-30 h-15 absolute bottom-2 right-10 bg-blue-400 p-4 rounded-full " onPress={() => setModalVisible(true)}>
-                        <Ionicons name='add' size={20} color={'#fff'} />
-                    </TouchableOpacity>
+
                 </View>
             )}
+            <TouchableOpacity className="w-30 h-15 absolute bottom-[10%] right-10 bg-blue-400 p-4 rounded-full " onPress={() => setModalVisible(true)}>
+                <Ionicons name='add' size={20} color={'#fff'} />
+            </TouchableOpacity>
         </View>
     );
 };

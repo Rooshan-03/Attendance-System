@@ -124,17 +124,14 @@ const ShowAttendance = ({ navigation }) => {
                     Attendance
                 </Text>
             </View>
-            
+
             <FlatList
                 data={presentStudents}
                 keyExtractor={item => item.rollNo.toString()}
                 renderItem={RenderStudents}
             />
-            <TouchableOpacity className="w-30 h-15 absolute bottom-20 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={exportToExcel}>
-                <View className='flex justify-center items-center flex-row'>
-                    <Ionicons name='share-social-sharp' color={'#fff'} />
-                    <Text className='text-sm ml-2 text-white font-bold'>Share</Text>
-                </View>
+            <TouchableOpacity className=" absolute bottom-20 right-10 bg-blue-400 p-4 rounded-full" onPress={exportToExcel}>
+                    <Ionicons name='share-social-sharp' size={20} color={'#fff'} />
             </TouchableOpacity>
         </View>
     );
