@@ -24,15 +24,15 @@ const MarkAttendance = ({ navigation }) => {
                     }
                     const subjectSnapshot = await get(ref(db, `Users/${uid}/Classes/${classId}`));
                     if (subjectSnapshot.exists()) {
-                        console.log('Trying to get Class Name')
+
                         setClassName(subjectSnapshot.val().className);
-                        console.log('got Class Name')
+
                     }
-                    console.log('Trying to get data')
+
                     const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
                     if (snapshot.exists()) {
                         const data = snapshot.val()
-                        console.log('Got data')
+
                         const list = Object.entries(data).map(([key, val]) => ({
                             id: key,
                             ...val,
@@ -235,6 +235,7 @@ const MarkAttendance = ({ navigation }) => {
                     <FlatList
                         className='rounded-3xl'
                         data={students}
+                        keyExtractor={item => item.id}
                         renderItem={({ item, index }) => (
                             <RenderItem
                                 item={item}
@@ -242,8 +243,7 @@ const MarkAttendance = ({ navigation }) => {
                             />
                         )
                         }
-                        removeClippedSubviews={true}
-                        keyExtractor={item => item.id}
+                        
                     />
                 </View>
                 <View className='bg-white w-full h-28 absolute bottom-0 '>

@@ -36,7 +36,6 @@ const Login = ({ navigation }) => {
       Alert.alert('Succcess!', "Login Successfull")
       setLoading(false)
       setUserState(true);
-      console.log(checkUserState())
       getDataFromRTDB();
       navigation.navigate('Home')
     } catch (error) {

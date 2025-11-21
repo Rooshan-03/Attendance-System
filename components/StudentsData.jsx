@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from 'react'
-import { View, Text, FlatList, Button, Modal, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, Button, Modal, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import { useEffect, useState } from 'react'
 import { auth } from 'firebase.config'
 import { get, getDatabase, ref, push, set } from 'firebase/database'
@@ -12,13 +12,16 @@ const StudentsData = ({ navigation }) => {
     const [roll, setRoll] = useState('');
     const [loadingSubmit, setLoadingSubmit] = useState(false)
     const [loadingAddMore, setLoadingAddMore] = useState(false)
+    const [className, setClassName] = useState('');
+    const [isLoading, setLoading] = useState(true)
     //getting id and subject name using props from ClassDAta Screen
     const { classId, subjectId, subjectName } = useRoute().params
+    const db = getDatabase()
     const uid = auth.currentUser.uid
     //Header Setting
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: subjectName
+            title: 'Students'
         })
     })
     //UseEffect
@@ -29,7 +32,10 @@ const StudentsData = ({ navigation }) => {
                 if (!uid) {
                     return
                 }
-                const db = getDatabase()
+                const subjectSnapshot = await get(ref(db, `Users/${uid}/Classes/${classId}`));
+                if (subjectSnapshot.exists()) {
+                    setClassName(subjectSnapshot.val().className);
+                }
                 const snapshot = await get(ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students`))
                 if (snapshot.exists()) {
                     const studentsArray = Object.entries(snapshot.val()).map(([key, value]) => ({
@@ -37,12 +43,14 @@ const StudentsData = ({ navigation }) => {
                         ...value,
                     }));
                     setStudents(studentsArray)
-                }
-                else {
-                    console.log('Error', 'No students Found')
+                    setLoading(false)
+                } else {
+                    setLoading(false)
                 }
             } catch (error) {
-                console.log('Error', error)
+                Alert.alert('Warning', 'Something Went Wrong')
+                setLoading(false)
+
             }
         }
         fetchStudents();
@@ -93,6 +101,63 @@ const StudentsData = ({ navigation }) => {
 
     return (
         <View className='flex-1'>
+            {
+                isLoading ? (
+                    <View className='flex-1 justify-center items-center'>
+                        <ActivityIndicator color={'blue'} size={'large'} />
+                    </View>
+                ) : students.length === 0 ? (
+                    <View className='flex-1 justify-center items-center'>
+                        <View className='flex justify-center items-center h-[90%]'>
+                            <Text className='text-red-600 font-extrabold'>No students</Text>
+                        </View>
+                        <View className='absolute bottom-[10%] right-3 p-3'>
+                            <TouchableOpacity className="w-14 h-14 bg-blue-400 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
+                                <Ionicons name='add-sharp' size={20} color={'#fff'} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                ) : (
+                    <View className='flex-1 items-center justify-center'>
+                        <View className='w-[95%]  p-4 m-4 rounded-xl bg-blue-200/90 '>
+                            {/* First row(Class Name and subjectName) */}
+                            <View className='flex flex-row justify-between mx-5'>
+                                <View className='flex flex-row px-3 '>
+                                    <Ionicons name='people-outline' className='mx-1' color={'#2563EB'} size={12} />
+                                    <Text className='text-xs text-blue-700 font-bold'>{className}</Text>
+                                </View>
+                                <View className='flex flex-row px-3 '>
+                                    <Ionicons name='book-outline' className='mx-1' color={'#2563EB'} size={12} />
+                                    <Text className='text-xs text-blue-700 font-bold'>{subjectName}</Text>
+                                </View>
+                            </View>
+                        </View>
+                        <View className='w-[95%] max-h-[80%]  bg-white rounded-2xl'>
+                            <FlatList
+                                data={students}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item, index }) => <RenderStudents item={item} number={index} />}
+                            />
+                        </View>
+                        <View className='flex-1 flex-row justify-center items-center'>
+                            <View className='absolute bottom-32 left-[25%] p-3'>
+                                <TouchableOpacity className="w-14 h-14 bg-blue-400 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
+                                    <Ionicons name='add-sharp' size={20} color={'#fff'} />
+                                </TouchableOpacity>
+                            </View>
+                            <View className='bg-white w-full h-28 absolute bottom-0 '>
+                                <TouchableOpacity className="top-0 mx-6 h-12 flex flex-row justify-center bg-blue-400  rounded-md mt-5 items-center" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId, subjectName })}>
+                                    <Ionicons name='checkmark-done-outline' color={"#fff"} size={20} />
+                                    <Text className="text-white ml-2 font-sens text-xl">
+                                        Mark Attendance
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                )
+            }
+
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -157,26 +222,8 @@ const StudentsData = ({ navigation }) => {
                 </View>
             </Modal>
 
-            <FlatList
-                data={students}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item, index }) => <RenderStudents item={item} number={index} />}
-                className='mb-20'
-                ListEmptyComponent={<Text className='p-20 flex-1 justify-center items-start'>Loading students...</Text>}
-            />
-            <View className='absolute bottom-20 right-5'>
-                <TouchableOpacity className="absolut left-10 w-14 h-14 bg-blue-400 p-4 m-2 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
-                    <Ionicons name='add-sharp' size={20} color={'#fff'} />
-                </TouchableOpacity>
-                <TouchableOpacity className="w-30 h-15 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId, subjectName })}>
-                    <View className='flex justify-center items-center flex-row'>
-                        <Ionicons name='checkmark-done-circle-outline' size={15} color={'#fff'} />
-                        <Text className='text-sm ml-2 text-white font-bold'>Mark Attendance</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
         </View>
     )
 }
 
-export default StudentsData
+export default StudentsData;

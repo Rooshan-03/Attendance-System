@@ -124,8 +124,7 @@ const ShowAttendance = ({ navigation }) => {
                     Attendance
                 </Text>
             </View>
-
-
+            
             <FlatList
                 data={presentStudents}
                 keyExtractor={item => item.rollNo.toString()}

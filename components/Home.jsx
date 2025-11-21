@@ -12,17 +12,16 @@ const Home = ({ navigation }) => {
     const [loadingAddMore, setLoadingAddMore] = useState(false);
     const [loadingClasses, setLoadingClasses] = useState(true);
 
-    useEffect(() => {
-
+    useEffect(() => {        
         navigation.setOptions({
             headerLeft: () => (
                 <TouchableOpacity className='mx-3' onPress={toggleDrawer}>
                     <Ionicons name='menu' size={20} />
                 </TouchableOpacity>
             ),
-            headerTitle:"Classes"
-        }) 
-        const toggleDrawer = ()=>{
+            headerTitle: "Classes"
+        })
+        const toggleDrawer = () => {
 
         }
         const db = getDatabase();
@@ -33,14 +32,12 @@ const Home = ({ navigation }) => {
         const fetchClasses = async () => {
             const classesRef = ref(db, `Users/${uid}/Classes`);
             const snapshot = await get(classesRef)
-            console.log('Fetching Data')
             if (snapshot.exists()) {
                 const classesArray = Object.entries(snapshot.val()).map(([key, value]) => ({
                     id: key,
                     ...value,
                 }))
                 setLoadingClasses(false)
-                console.log("Data Fetched")
                 setClasses(classesArray);
             } else {
                 setLoadingClasses(false)
@@ -151,24 +148,20 @@ const Home = ({ navigation }) => {
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="blue" />
                 </View>
+            ) : classes.length === 0 ? (
+                <View className="flex-1 justify-center items-center">
+                    <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
+                </View>
             ) : (
                 <View>
                     <FlatList
                         data={classes}
                         keyExtractor={item => item.id}
                         renderItem={RenderClass}
-                        contentContainerStyle={classes.length === 0 ? { flex: 1 } : { paddingBottom: 40 , marginTop:20 }}
-                        ListEmptyComponent={
-                            <View className="flex-1 justify-center items-center">
-                                <Text className="text-red-500 font-bold text-xl">No Classes Yet..</Text>
-                            </View>
-                        }
+                        className='mt-2 h-[92%]'
                     />
-                    <TouchableOpacity className="w-30 h-15 absolute bottom-20 right-10 bg-blue-500 p-4 rounded-lg shadow-lg" onPress={() => setModalVisible(true)}>
-                        <View className='flex justify-center items-center flex-row'>
-                            <Ionicons name='add' size={15} color={'#fff'} />
-                            <Text className='text-sm ml-2 text-white font-bold'>Add </Text>
-                        </View>
+                    <TouchableOpacity className="w-30 h-15 absolute bottom-2 right-10 bg-blue-400 p-4 rounded-full " onPress={() => setModalVisible(true)}>
+                        <Ionicons name='add' size={20} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
             )}

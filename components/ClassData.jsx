@@ -83,18 +83,18 @@ const ClassData = ({ navigation }) => {
     }
     const RenderSubjects = ({ item }) => (
         <TouchableOpacity
-            className="mx-3 my-2 bg-white rounded-2xl shadow-md flex-row items-center p-4"
+            className="mx-3 my-1 bg-white rounded-2xl shadow-md flex-row items-center p-3"
             onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName, classId })}
         >
-            <View className="w-10 h-10 bg-blue-100 rounded-full justify-center items-center mr-3">
-                <Ionicons name="book-outline" size={22} color="#2563EB" />
+            <View className="w-8 h-8 bg-blue-100 rounded-full justify-center items-center mr-3">
+                <Ionicons name="book-outline" size={18} color="#2563EB" />
             </View>
 
             <View className="flex-1">
                 <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
             </View>
 
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={17} color="#9CA3AF" />
         </TouchableOpacity>
     );
 
@@ -171,19 +171,16 @@ const ClassData = ({ navigation }) => {
                             data={subjects}
                             keyExtractor={(item) => item.id}
                             renderItem={RenderSubjects}
-                            className="flex-1"
+                            className="flex-1 mt-3"
                         />
-                        <TouchableOpacity
-                            className="w-30 h-15 absolute bottom-28 right-10 bg-blue-500 p-4 rounded-lg shadow-lg"
-                            onPress={() => setModalVisible(true)}
-                        >
-                            <View className="flex justify-center items-center flex-row">
-                                <Ionicons name="add-circle" size={15} color="#fff" />
-                                <Text className="text-sm ml-2 text-white font-bold">Add</Text>
-                            </View>
-                        </TouchableOpacity>
                     </View>
                 )}
+                <TouchableOpacity
+                    className="w-30 h-15 absolute bottom-24 right-10 bg-blue-400 p-4 rounded-full "
+                    onPress={() => setModalVisible(true)}
+                >
+                        <Ionicons name="add" size={20} color="#fff" />
+                </TouchableOpacity>
             </View>
         </View>
     )
