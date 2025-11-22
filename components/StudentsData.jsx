@@ -2,9 +2,10 @@ import React, { useLayoutEffect } from 'react'
 import { View, Text, FlatList, Button, Modal, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import { useEffect, useState } from 'react'
 import { auth } from 'firebase.config'
-import { get, getDatabase, ref, push, set } from 'firebase/database'
+import { get, getDatabase, ref, push, set, update, remove } from 'firebase/database'
 import { useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
+import { Menu } from 'react-native-paper'
 const StudentsData = ({ navigation }) => {
     const [students, setStudents] = useState([])
     const [modalVisible, setModalVisible] = useState(false);
@@ -14,18 +15,26 @@ const StudentsData = ({ navigation }) => {
     const [loadingAddMore, setLoadingAddMore] = useState(false)
     const [className, setClassName] = useState('');
     const [isLoading, setLoading] = useState(true)
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [updateStudentName, setUpdateStudentName] = useState('')
+    const [updateStudentRollNo, setUpdateStudentRollNo] = useState('')
+    const [updateModalVisible, setUpdateModalVisible] = useState(false)
     //getting id and subject name using props from ClassDAta Screen
     const { classId, subjectId, subjectName } = useRoute().params
     const db = getDatabase()
     const uid = auth.currentUser.uid
+
+
+    const openItemMenu = (id) => setSelectedItemId(id)
+    const closeItemMenu = () => setSelectedItemId(null)
     //Header Setting
     useLayoutEffect(() => {
         navigation.setOptions({
             title: 'Students',
             headerRight: () => (
-                    <TouchableOpacity  onPress={() => setModalVisible(true)}>
-                        <Ionicons name='add-sharp' size={25} color={'#000'} />
-                    </TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                    <Ionicons name='add-sharp' size={25} color={'#000'} />
+                </TouchableOpacity>
             )
         })
     })
@@ -88,22 +97,133 @@ const StudentsData = ({ navigation }) => {
             console.log('Error adding student:', error);
         }
     };
+    const updateStudent = async (student) => {
+        setUpdateStudentName(student.Name);
+        setUpdateStudentRollNo(student.RollNo);
+        setUpdateModalVisible(true);
+
+    }
+    const deleteStudent = async (studentId) => {
+        Alert.alert('Warning',
+            'Are You sure you want to delete this Student?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+
+                },
+                {
+                    text: 'Ok',
+                    onPress: async () => {
+                        const uid = auth.currentUser.uid
+                        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students/${studentId}`)
+                        await remove(deleteRef)
+                        setStudents(prev => prev.filter(s => s.id !== studentId));
+                    }
+                }
+            ]
+        )
+    }
     //Render Students   
     const RenderStudents = ({ item, number }) => {
         return (
             <View className="bg-white rounded-md flex-row flex justify-center items-center mb-2" style={{ borderBottomWidth: 0.3 }}>
-                    <Text className='mx-3'>{number + 1}</Text>
+                <Text className='mx-3'>{number + 1}</Text>
 
-                <View className="flex-1 mx-2 p-1">
+                <View className="flex-1 mx-2 p-1 mb-1">
                     <Text className="text-sm font-sens font-semibold">{item.Name}</Text>
                     <Text className="text-xs font-sens text-slate-500 mt[0.5]">{item.RollNo}</Text>
                 </View>
+                <Menu
+                    visible={selectedItemId == item.id}
+                    onDismiss={closeItemMenu}
+                    anchor={
+                        <TouchableOpacity
+                            onPress={() => openItemMenu(item.id)}
+                            className="w-8 h-8 mr-3 flex items-center justify-center rounded"
+                        >
+                            <Ionicons name="ellipsis-vertical" size={18} color="grey" />
+                        </TouchableOpacity>
+
+                    }
+                >
+                    <Menu.Item title='Update' onPress={() => updateStudent(item)} />
+                    <Menu.Item title='Delete' onPress={() => deleteStudent(item.id)} />
+                </Menu>
             </View>
         )
     }
+    const handleUpdateSubmit = async () => {
+        if (!updateStudentName.trim()) {
+            alert('Please enter valid Student Name');
+            return;
+        }
+        const nameExists = students.some(
+            s => s.Name.toLowerCase() === updateStudentName.trim().toLowerCase() && s.id !== selectedItemId
+        );
+        if (nameExists) {
+            alert('Student with this name already exists');
+            return;
+        }
+        const rollNoExists = students.some(
+            s => s.RollNo.toLowerCase() === updateStudentRollNo.trim().toLowerCase() && s.id !== selectedItemId
+        );
+        if (rollNoExists) {
+            alert('Student with this Roll No exists');
+            return;
+        }
 
+        console.log(selectedItemId, updateStudentName, updateStudentRollNo)
+        const uid = auth.currentUser.uid
+        console.log(selectedItemId)
+        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students/${selectedItemId}`)
+        await update(updateRef, { Name: updateStudentName, RollNo: updateStudentRollNo })
+        setStudents(prev =>
+            prev.map(s => s.id === selectedItemId ? { ...s, Name: updateStudentName, RollNo: updateStudentRollNo } : s)
+        )
+        closeItemMenu()
+        setUpdateModalVisible(false)
+        setUpdateStudentName('')
+    }
     return (
         <View className='flex-1'>
+            <Modal
+                animationType="slide"
+                transparent
+                visible={updateModalVisible}
+                onRequestClose={() => setUpdateModalVisible(false)}
+            >
+                <View className="flex-1 justify-center items-center bg-black/50">
+
+                    <View className='flex items-center justify-center p-6 m-3 bg-white w-[95%] rounded-lg '>
+                        <Text className='font-sens font-bold m-3'>Edit Student Name</Text>
+                        <TextInput
+                            placeholder='Class Name to edit'
+                            value={updateStudentName}
+                            onChangeText={setUpdateStudentName}
+                            className='w-full border border-gray-300 rounded-md px-3 py-2 mb-3'
+                        />
+                        <TextInput
+                            placeholder='Roll No to edit'
+                            value={updateStudentRollNo}
+                            onChangeText={setUpdateStudentRollNo}
+                            className='w-full border border-gray-300 rounded-md px-3 py-2 mb-3'
+                        />
+                        <View className='w-full'>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-green-500 flex items-center p-2 justify-center' onPress={handleUpdateSubmit} >
+                                <Text className='text-white font-bold '>
+                                    Update
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-slate-500 flex items-center p-2 justify-center' onPress={() => { setUpdateModalVisible(false), closeItemMenu() }}>
+                                <Text className='text-white font-bold'>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             {
                 isLoading ? (
                     <View className='flex-1 justify-center items-center'>

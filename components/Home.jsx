@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { auth } from 'firebase.config';
 import { getDatabase, ref, push, set, get, update, remove } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,26 +12,23 @@ const Home = ({ navigation }) => {
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [loadingAddMore, setLoadingAddMore] = useState(false);
     const [loadingClasses, setLoadingClasses] = useState(true);
-    const [visible, setVisible] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [updateClassName, setUpdateClassName] = useState('')
-    const [updateModalVisible, setUpdateModalVisible] = useState('')
+    const [updateModalVisible, setUpdateModalVisible] = useState(false)
     const db = getDatabase();
 
-    const openMenu = () => setVisible(true)
-    const closeMenu = () => setVisible(false)
     const openItemMenu = (id) => setSelectedItemId(id)
     const closeItemMenu = () => setSelectedItemId(null)
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: "Classes",
             headerRight: () => (
-              <TouchableOpacity  onPress={() => setModalVisible(true)}>
-                <Ionicons name='add' size={25} color={'#000'} />
-            </TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                    <Ionicons name='add' size={25} color={'#000'} />
+                </TouchableOpacity>
             )
         });
-    }, [navigation, visible]);
+    }, [navigation]);
 
     useEffect(() => {
         const uid = auth.currentUser?.uid;
@@ -83,15 +80,29 @@ const Home = ({ navigation }) => {
             setLoadingAddMore(false);
         }
     };
-    const updateClass = async (id) => {
+    const updateClass = async () => {
         setUpdateModalVisible(true)
-
     }
     const deleteClass = async (classId) => {
-        const uid = auth.currentUser.uid
-        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}`)
-        await remove(deleteRef)
-        setClasses(prev => prev.filter(c => c.id !== classId));
+        Alert.alert('Warning',
+            'Are You sure you want to delete this Class?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+
+                },
+                {
+                    text: 'Ok',
+                    onPress: async () => {
+                        const uid = auth.currentUser.uid
+                        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}`)
+                        await remove(deleteRef)
+                        setClasses(prev => prev.filter(c => c.id !== classId));
+                    }
+                }
+            ]
+        )
 
     }
     const RenderClass = ({ item, index }) => (
@@ -114,7 +125,7 @@ const Home = ({ navigation }) => {
                     </TouchableOpacity>
                 }
             >
-                <Menu.Item title='Update' onPress={() => updateClass(item.id)} />
+                <Menu.Item title='Update' onPress={() => updateClass()} />
                 <Menu.Item title='Delete' onPress={() => deleteClass(item.id)} />
             </Menu>
         </TouchableOpacity>
@@ -253,7 +264,7 @@ const Home = ({ navigation }) => {
 
                 </View>
             )}
-           
+
         </View>
     );
 };

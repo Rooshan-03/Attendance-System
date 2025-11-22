@@ -1,9 +1,10 @@
-import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from 'firebase.config';
-import { get, getDatabase, push, ref, set } from 'firebase/database';
+import { get, getDatabase, push, ref, remove, set, update } from 'firebase/database';
+import { Menu } from 'react-native-paper';
 
 const ClassData = ({ navigation }) => {
     //useState Hooks for managing states
@@ -13,8 +14,42 @@ const ClassData = ({ navigation }) => {
     const [loadingSubmit, setLoadingSubmit] = useState(false)
     const [loadingAddMore, setLoadingAddMore] = useState(false)
     const [isLoading, setLoading] = useState(true)
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [updateSubjectName, setUpdateSubjectName] = useState('')
+    const [updateModalVisible, setUpdateModalVisible] = useState(false)
+    const db = getDatabase()
     //Getting ClassName as prop from Home Screen
     const { className, classId } = useRoute().params
+
+    const openItemMenu = (id) => setSelectedItemId(id)
+    const closeItemMenu = () => setSelectedItemId(null)
+    const updateSubject = (item) => {
+        setSelectedItemId(item.id);
+        setUpdateSubjectName(item.subjectName);
+        setUpdateModalVisible(true);
+    };
+
+    const deleteSubject = async (subjectId) => {
+
+        Alert.alert('Warning', 'Are You sure You want to delete this subject?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+
+                },
+                {
+                    text: 'Ok',
+                    onPress: async () => {
+                        const uid = auth.currentUser.uid
+                        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}`)
+                        await remove(deleteRef)
+                        setSubjects(prev => prev.filter(s => s.id !== subjectId));
+                    }
+                }
+            ]
+        )
+    }
     // fetching data in useEffexct Hook
     useEffect(() => {
         //fetching data from firebase
@@ -99,15 +134,79 @@ const ClassData = ({ navigation }) => {
             <View className="flex-1">
                 <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
             </View>
-
-            <Ionicons name="chevron-forward" size={17} color="#9CA3AF" />
+            <Menu
+                visible={selectedItemId == item.id}
+                onDismiss={closeItemMenu}
+                anchor={
+                    <TouchableOpacity onPress={() => openItemMenu(item.id)} className='pl-3 rounded-full w-10  h-7'>
+                        <Ionicons name="ellipsis-vertical" size={18} color="grey" />
+                    </TouchableOpacity>
+                }
+            >
+                <Menu.Item title='Update' onPress={() => updateSubject(item)} />
+                <Menu.Item title='Delete' onPress={() => deleteSubject(item.id)} />
+            </Menu>
         </TouchableOpacity>
     );
 
-
+    const handleUpdateSubmit = async () => {
+        if (!updateSubjectName.trim()) {
+            alert('Please Enter Subject Name')
+            return;
+        }
+        console.log(selectedItemId, updateSubjectName)
+        const uid = auth.currentUser.uid
+        console.log(selectedItemId)
+        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${selectedItemId}`)
+        await update(updateRef, { subjectName: updateSubjectName })
+        setSubjects(prev =>
+            prev.map(s => s.id === selectedItemId ? { ...s, subjectName: updateSubjectName } : s)
+        )
+        closeItemMenu()
+        setUpdateModalVisible(false)
+        setUpdateSubjectName('')
+        setUpdateModalVisible(false)
+    }
 
     return (
         <View className='flex-1'>
+            <Modal
+                animationType="slide"
+                transparent
+                visible={updateModalVisible}
+                onRequestClose={() => setUpdateModalVisible(false)}
+            >
+                <View className="flex-1 justify-center items-center bg-black/50">
+
+                    <View className='flex items-center justify-center p-6 m-3 bg-white w-[95%] rounded-lg '>
+                        <Text className='font-sens font-bold m-3'>Edit Subject Name</Text>
+
+                        <TextInput
+                            placeholder='Subject Name to edit'
+                            value={updateSubjectName}
+                            onChangeText={setUpdateSubjectName}
+                            className='w-full border border-gray-300 rounded-md px-3 py-2 mb-3'
+                        />
+                        <View className='w-full'>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-green-500 flex items-center p-2 justify-center' onPress={handleUpdateSubmit} >
+                                <Text className='text-white font-bold '>
+                                    Update
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-slate-500 flex items-center p-2 justify-center' onPress={() => {
+                                closeItemMenu();
+                                setUpdateModalVisible(false);
+
+                            }}
+                            >
+                                <Text className='text-white font-bold'>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             <Modal animationType='fade'
                 transparent={true}
                 visible={modalVisible}
