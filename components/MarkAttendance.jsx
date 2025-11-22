@@ -132,11 +132,11 @@ const MarkAttendance = ({ navigation }) => {
             const onA = () => updateStatus(item.id, "A");
             const onL = () => updateStatus(item.id, "L");
             return (
-                <View className="w-full bg-white p-2 flex-row items-center" style={{ borderBottomWidth: 0.3 }}>
+                <View className="w-full bg-white p-2 flex-row" style={{ borderBottomWidth: 0.3 }}>
                     <View className=" p-2  mr-4">
                         <Text>{number + 1}</Text>
                     </View>
-                    <View className="flex-1 items-center">
+                    <View className="flex-1">
                         <Text className="text-sm font-medium text-gray-800">{item.Name}</Text>
                         <Text className="text-xs text-gray-500"> {item.RollNo}</Text>
                     </View>
@@ -160,8 +160,8 @@ const MarkAttendance = ({ navigation }) => {
                         <RadioButton
                             label={'L'}
                             color={'bg-gray-200'}
-                            selectedColor={'bg-blue-200'}
-                            textColor={'text-blue-700'}
+                            selectedColor={'bg-yellow-200'}
+                            textColor={'text-yellow-600'}
                             onPress={onL}
                             selected={item.Attendance === "L"}
                         />
@@ -225,13 +225,13 @@ const MarkAttendance = ({ navigation }) => {
                     <View className='w-[30%] m-2 h-20 bg-white rounded-lg p-3'>
                         <Text className='font-semibold text-gray-500 '>Leave</Text>
                         <View className='mt-3 flex flex-row'>
-                            <View className='w-3 h-3 bg-blue-600 rounded-full' />
+                            <View className='w-3 h-3 bg-yellow-400 rounded-full' />
                             <Text className='text-xs pl-1'>{Leave}</Text>
                         </View>
                     </View>
                 </View>
                 {/* Flatlist started */}
-                <View className="w-[90%] h-4/5 mt-3 pb-40" >
+                <View className="w-[95%] h-4/5 mt-3 pb-40" >
                     <FlatList
                         className='rounded-md'
                         data={students}
