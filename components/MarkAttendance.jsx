@@ -179,7 +179,7 @@ const MarkAttendance = ({ navigation }) => {
         ) : (
             <View className="flex-1 items-center">
                 {/* Top View for Details */}
-                <View className='w-[95%] flex flex-col mt-2 p-2 rounded-xl border border-blue-200 bg-blue-200/90 '>
+                <View className='w-[95%] flex flex-col mt-2 p-2 rounded-md border border-blue-200 bg-blue-200/90 '>
                     {/* First row(Class Name and subjectName) */}
                     <View className='flex flex-row justify-between mx-5'>
                         <View className='flex flex-row px-3 m-2'>
@@ -233,7 +233,7 @@ const MarkAttendance = ({ navigation }) => {
                 {/* Flatlist started */}
                 <View className="w-[90%] h-4/5 mt-3 pb-40" >
                     <FlatList
-                        className='rounded-3xl'
+                        className='rounded-md'
                         data={students}
                         keyExtractor={item => item.id}
                         renderItem={({ item, index }) => (

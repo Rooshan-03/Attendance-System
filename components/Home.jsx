@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { auth } from 'firebase.config';
-import { getDatabase, ref, push, set, onValue, get } from 'firebase/database';
+import { getDatabase, ref, push, set, get, update, remove } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
+import { Menu, Divider } from 'react-native-paper';
 
 const Home = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -11,20 +12,28 @@ const Home = ({ navigation }) => {
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [loadingAddMore, setLoadingAddMore] = useState(false);
     const [loadingClasses, setLoadingClasses] = useState(true);
+    const [visible, setVisible] = useState(false);
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [updateClassName, setUpdateClassName] = useState('')
+    const [updateModalVisible, setUpdateModalVisible] = useState('')
+    const db = getDatabase();
+
+    const openMenu = () => setVisible(true)
+    const closeMenu = () => setVisible(false)
+    const openItemMenu = (id) => setSelectedItemId(id)
+    const closeItemMenu = () => setSelectedItemId(null)
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerTitle: "Classes",
+            headerRight: () => (
+              <TouchableOpacity  onPress={() => setModalVisible(true)}>
+                <Ionicons name='add' size={25} color={'#000'} />
+            </TouchableOpacity>
+            )
+        });
+    }, [navigation, visible]);
 
     useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <TouchableOpacity className='mx-3' onPress={toggleDrawer}>
-                    <Ionicons name='menu' size={20} />
-                </TouchableOpacity>
-            ),
-            headerTitle: "Classes"
-        })
-        const toggleDrawer = () => {
-
-        }
-        const db = getDatabase();
         const uid = auth.currentUser?.uid;
         if (!uid) {
             return;
@@ -45,7 +54,7 @@ const Home = ({ navigation }) => {
             }
         }
         fetchClasses()
-    }, [])
+    }, [classes])
     const handleSubmit = async () => {
         if (!className.trim()) {
             alert('Please enter a class name');
@@ -74,19 +83,67 @@ const Home = ({ navigation }) => {
             setLoadingAddMore(false);
         }
     };
+    const updateClass = async (id) => {
+        setUpdateModalVisible(true)
 
-    const RenderClass = ({ item }) => (
+    }
+    const deleteClass = async (classId) => {
+        const uid = auth.currentUser.uid
+        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}`)
+        await remove(deleteRef)
+        setClasses(prev => prev.filter(c => c.id !== classId));
+
+    }
+    const RenderClass = ({ item, index }) => (
+
         <TouchableOpacity
             className="bg-white rounded-lg p-4 mx-4 my-1 flex-row justify-between items-center"
             onPress={() => navigation.navigate('ClassData', { className: item.className, classId: item.id })}
         >
-            <Text className="text-base">📘 {item.className}</Text>
-        </TouchableOpacity>
-    );
+            <View className="flex-row items-center">
+                <Text className="font-bold text-slate-500">{index + 1}</Text>
+                <Text className="text-base font-sans ml-2">{item.className}</Text>
+            </View>
 
+            <Menu
+                visible={selectedItemId == item.id}
+                onDismiss={closeItemMenu}
+                anchor={
+                    <TouchableOpacity onPress={() => openItemMenu(item.id)} style={{ paddingLeft: 10 }}>
+                        <Ionicons name="ellipsis-vertical" size={18} color="grey" />
+                    </TouchableOpacity>
+                }
+            >
+                <Menu.Item title='Update' onPress={() => updateClass(item.id)} />
+                <Menu.Item title='Delete' onPress={() => deleteClass(item.id)} />
+            </Menu>
+        </TouchableOpacity>
+
+
+
+
+
+    );
+    const handleUpdateSubmit = async () => {
+        if (!updateClassName.trim()) {
+            alert('Please Enter Class Name')
+            return;
+        }
+        console.log(selectedItemId, updateClassName)
+        const uid = auth.currentUser.uid
+        console.log(selectedItemId)
+        const updateRef = ref(db, `Users/${uid}/Classes/${selectedItemId}`)
+        await update(updateRef, { className: updateClassName })
+        setClasses(prev =>
+            prev.map(c => c.id === selectedItemId ? { ...c, className: updateClassName } : c)
+        )
+        closeItemMenu()
+        setUpdateModalVisible(false)
+        setUpdateClassName('')
+        setUpdateModalVisible(false)
+    }
     return (
         <View className="flex-1">
-            {/* Modal */}
             <Modal
                 animationType="slide"
                 transparent
@@ -143,7 +200,39 @@ const Home = ({ navigation }) => {
                 </View>
             </Modal>
 
+            {/* Modal for updation of className */}
+            <Modal
+                animationType="slide"
+                transparent
+                visible={updateModalVisible}
+                onRequestClose={() => setUpdateModalVisible(false)}
+            >
+                <View className="flex-1 justify-center items-center bg-black/50">
 
+                    <View className='flex items-center justify-center p-6 m-3 bg-white w-[95%] rounded-lg '>
+                        <Text className='font-sens font-bold m-3'>Edit Class Name</Text>
+
+                        <TextInput
+                            placeholder='Class Name to edit'
+                            value={updateClassName}
+                            onChangeText={setUpdateClassName}
+                            className='w-full border border-gray-300 rounded-md px-3 py-2 mb-3'
+                        />
+                        <View className='w-full'>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-green-500 flex items-center p-2 justify-center' onPress={handleUpdateSubmit} >
+                                <Text className='text-white font-bold '>
+                                    Update
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity className='w-full rounded-lg m-1 bg-slate-500 flex items-center p-2 justify-center' onPress={() => { setUpdateModalVisible(false), closeItemMenu }}>
+                                <Text className='text-white font-bold'>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             {loadingClasses ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="blue" />
@@ -157,15 +246,14 @@ const Home = ({ navigation }) => {
                     <FlatList
                         data={classes}
                         keyExtractor={item => item.id}
-                        renderItem={RenderClass}
-                        className='mt-2 h-[92%]'
+                        renderItem={({ item, index }) => (
+                            <RenderClass item={item} index={index} />
+                        )} className='mt-2 h-[92%]'
                     />
 
                 </View>
             )}
-            <TouchableOpacity className="w-30 h-15 absolute bottom-[10%] right-10 bg-blue-400 p-4 rounded-full " onPress={() => setModalVisible(true)}>
-                <Ionicons name='add' size={20} color={'#fff'} />
-            </TouchableOpacity>
+           
         </View>
     );
 };

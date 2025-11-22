@@ -52,7 +52,13 @@ const ClassData = ({ navigation }) => {
     // Using Classame as title and also displaying + on top to add subject
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: className || 'Class Data'
+            title: className || 'Class Data',
+            headerRight: () => (
+                <TouchableOpacity
+                    onPress={() => setModalVisible(true)}
+                >
+                    <Ionicons name="add" size={25} color="#000" />
+                </TouchableOpacity>)
         });
     }, [navigation, className]);
     // Adding Subjects inside classes Path
@@ -175,12 +181,7 @@ const ClassData = ({ navigation }) => {
                         />
                     </View>
                 )}
-                <TouchableOpacity
-                    className="w-30 h-15 absolute bottom-24 right-10 bg-blue-400 p-4 rounded-full "
-                    onPress={() => setModalVisible(true)}
-                >
-                        <Ionicons name="add" size={20} color="#fff" />
-                </TouchableOpacity>
+
             </View>
         </View>
     )

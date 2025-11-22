@@ -21,7 +21,12 @@ const StudentsData = ({ navigation }) => {
     //Header Setting
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: 'Students'
+            title: 'Students',
+            headerRight: () => (
+                    <TouchableOpacity  onPress={() => setModalVisible(true)}>
+                        <Ionicons name='add-sharp' size={25} color={'#000'} />
+                    </TouchableOpacity>
+            )
         })
     })
     //UseEffect
@@ -86,14 +91,12 @@ const StudentsData = ({ navigation }) => {
     //Render Students   
     const RenderStudents = ({ item, number }) => {
         return (
-            <View className="bg-white mx-4 p-2 flex-row items-center" style={{ borderBottomWidth: 0.5 }}>
-                <View className="p-2 rounded-full ml-2 mr-4">
-                    <Text>{number + 1}</Text>
-                </View>
+            <View className="bg-white rounded-md flex-row flex justify-center items-center mb-2" style={{ borderBottomWidth: 0.3 }}>
+                    <Text className='mx-3'>{number + 1}</Text>
 
-                <View className="flex-1 items-center mr-8">
-                    <Text className="text-sm font-sens font-medium text-gray-800">{item.Name}</Text>
-                    <Text className="text-xs font-sens text-gray-500 mt[0.5]">{item.RollNo}</Text>
+                <View className="flex-1 mx-2 p-1">
+                    <Text className="text-sm font-sens font-semibold">{item.Name}</Text>
+                    <Text className="text-xs font-sens text-slate-500 mt[0.5]">{item.RollNo}</Text>
                 </View>
             </View>
         )
@@ -119,7 +122,7 @@ const StudentsData = ({ navigation }) => {
                     </View>
                 ) : (
                     <View className='flex-1 items-center justify-center'>
-                        <View className='w-[95%]  p-4 m-4 rounded-xl bg-blue-200/90 '>
+                        <View className='w-[95%]  p-4 m-4 rounded-md bg-blue-200/90 '>
                             {/* First row(Class Name and subjectName) */}
                             <View className='flex flex-row justify-between mx-5'>
                                 <View className='flex flex-row px-3 '>
@@ -132,7 +135,7 @@ const StudentsData = ({ navigation }) => {
                                 </View>
                             </View>
                         </View>
-                        <View className='w-[95%] max-h-[80%]  bg-white rounded-2xl'>
+                        <View className='w-[95%] max-h-[80%]  bg-white rounded-md'>
                             <FlatList
                                 data={students}
                                 keyExtractor={(item) => item.id}
@@ -140,11 +143,7 @@ const StudentsData = ({ navigation }) => {
                             />
                         </View>
                         <View className='flex-1 flex-row justify-center items-center'>
-                            <View className='absolute bottom-32 left-[25%] p-3'>
-                                <TouchableOpacity className="w-14 h-14 bg-blue-400 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
-                                    <Ionicons name='add-sharp' size={20} color={'#fff'} />
-                                </TouchableOpacity>
-                            </View>
+
                             <View className='bg-white w-full h-28 absolute bottom-0 '>
                                 <TouchableOpacity className="top-0 mx-6 h-12 flex flex-row justify-center bg-blue-400  rounded-md mt-5 items-center" onPress={() => navigation.navigate('MarkAttendance', { uid, subjectId, classId, subjectName })}>
                                     <Ionicons name='checkmark-done-outline' color={"#fff"} size={20} />
