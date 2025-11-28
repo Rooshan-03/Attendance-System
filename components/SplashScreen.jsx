@@ -9,15 +9,15 @@ const SplashScreen = ({ navigation }) => {
         console.log(checkUserState())
         setTimeout(() => {
             if (checkUserState()) {
-                navigation.navigate('Home')
+                navigation.navigate('HomeDrawer')
             }
             else {
                 navigation.navigate('Login')
             }
-        },2000)
+        }, 2000)
     }, [])
     return (
-        <View className='flex-1'> 
+        <View className='flex-1'>
             <View className="flex-1 justify-center items-center">
                 <Image
                     source={AppIcon}

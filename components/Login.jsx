@@ -37,7 +37,7 @@ const Login = ({ navigation }) => {
       setLoading(false)
       setUserState(true);
       getDataFromRTDB();
-      navigation.navigate('Home')
+      navigation.navigate('HomeDrawer')
     } catch (error) {
       setLoading(false)
       let message = "Something Went Wrong";

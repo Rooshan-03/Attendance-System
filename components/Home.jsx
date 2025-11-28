@@ -3,7 +3,7 @@ import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndic
 import { auth } from 'firebase.config';
 import { getDatabase, ref, push, set, get, update, remove } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
-import { Menu, Divider } from 'react-native-paper';
+import { Menu} from 'react-native-paper';
 
 const Home = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -15,6 +15,7 @@ const Home = ({ navigation }) => {
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [updateClassName, setUpdateClassName] = useState('')
     const [updateModalVisible, setUpdateModalVisible] = useState(false)
+    const [classItemId,setClassItemId] = useState('')
     const db = getDatabase();
 
     const openItemMenu = (id) => setSelectedItemId(id)
@@ -81,6 +82,8 @@ const Home = ({ navigation }) => {
         }
     };
     const updateClass = async () => {
+        setClassItemId(selectedItemId)
+        closeItemMenu()
         setUpdateModalVisible(true)
     }
     const deleteClass = async (classId) => {
@@ -143,7 +146,7 @@ const Home = ({ navigation }) => {
         console.log(selectedItemId, updateClassName)
         const uid = auth.currentUser.uid
         console.log(selectedItemId)
-        const updateRef = ref(db, `Users/${uid}/Classes/${selectedItemId}`)
+        const updateRef = ref(db, `Users/${uid}/Classes/${classItemId}`)
         await update(updateRef, { className: updateClassName })
         setClasses(prev =>
             prev.map(c => c.id === selectedItemId ? { ...c, className: updateClassName } : c)
@@ -259,7 +262,8 @@ const Home = ({ navigation }) => {
                         keyExtractor={item => item.id}
                         renderItem={({ item, index }) => (
                             <RenderClass item={item} index={index} />
-                        )} className='mt-2 h-[92%]'
+                        )} 
+                        className='mt-2 h-[92%]'
                     />
 
                 </View>
