@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const userLoggedInState = create(
+const useUserLoggedInState = create(
   persist(
     (set, get) => ({
       isLoggedIn: false,
@@ -16,4 +16,4 @@ const userLoggedInState = create(
   )
 );
 
-export default userLoggedInState;
+export default useUserLoggedInState;

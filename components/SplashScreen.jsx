@@ -1,18 +1,23 @@
 import { View, Image } from 'react-native'
 import React, { useEffect } from 'react'
 import AppIcon from '../assets/AppIcon.jpeg';
-import userLoggedInState from 'zustand/store';
-
+import useUserLoggedInState from 'zustand/store'
 const SplashScreen = ({ navigation }) => {
-    const { checkUserState } = userLoggedInState();
+    const { checkUserState } = useUserLoggedInState();
     useEffect(() => {
         console.log(checkUserState())
         setTimeout(() => {
             if (checkUserState()) {
-                navigation.navigate('HomeDrawer')
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "HomeDrawer" }],
+                });
             }
             else {
-                navigation.navigate('Login')
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Login" }],
+                });
             }
         }, 2000)
     }, [])

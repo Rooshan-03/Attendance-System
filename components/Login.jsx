@@ -15,6 +15,8 @@ const Login = ({ navigation }) => {
 
   // Zunstand Hook
   const { setUserState, checkUserState } = userLoggedInState()
+
+  //Login
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill all fields');
@@ -22,6 +24,7 @@ const Login = ({ navigation }) => {
     }
     loginUser(email, password)
   };
+
   const loginUser = async (email, password) => {
     try {
       setLoading(true)
@@ -37,7 +40,10 @@ const Login = ({ navigation }) => {
       setLoading(false)
       setUserState(true);
       getDataFromRTDB();
-      navigation.navigate('HomeDrawer')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeDrawer" }],
+      });
     } catch (error) {
       setLoading(false)
       let message = "Something Went Wrong";
@@ -78,7 +84,7 @@ const Login = ({ navigation }) => {
 
   const storeDataInAsyncStorage = async (user) => {
     try {
-      console.log(user)
+
       await AsyncStorage.setItem('user', JSON.stringify(
         {
           email: user.email,

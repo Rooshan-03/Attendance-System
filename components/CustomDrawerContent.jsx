@@ -6,11 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from 'firebase.config';
 import { ActivityIndicator } from 'react-native-paper';
+import useUserLoggedInState from 'zustand/store';
 
 const CustomDrawerContent = (props) => {
   const [storedUser, setStoredUser] = useState({})
   const [loading, setLoading] = useState(true)
   const navigation = useNavigation();
+
+  const { setUserState, checkUserState } = useUserLoggedInState();
 
   const handleLogout = async () => {
     Alert.alert('Warning',
@@ -26,7 +29,12 @@ const CustomDrawerContent = (props) => {
           onPress: async () => {
             await auth.signOut();
             await AsyncStorage.removeItem('user')
-            navigation.navigate('Login');
+            setUserState(false)
+            console.log(checkUserState())
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
           }
         }
       ]
@@ -39,6 +47,7 @@ const CustomDrawerContent = (props) => {
         const stored = await AsyncStorage.getItem('user');
         if (stored) {
           const user = JSON.parse(stored);
+          console.log(user)
           setStoredUser(user)
           setLoading(false)
         }
