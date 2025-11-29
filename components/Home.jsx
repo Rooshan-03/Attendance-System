@@ -3,7 +3,7 @@ import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndic
 import { auth } from 'firebase.config';
 import { getDatabase, ref, push, set, get, update, remove } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
-import { Menu} from 'react-native-paper';
+import { Menu } from 'react-native-paper';
 
 const Home = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -15,7 +15,7 @@ const Home = ({ navigation }) => {
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [updateClassName, setUpdateClassName] = useState('')
     const [updateModalVisible, setUpdateModalVisible] = useState(false)
-    const [classItemId,setClassItemId] = useState('')
+    const [classItemId, setClassItemId] = useState('')
     const db = getDatabase();
 
     const openItemMenu = (id) => setSelectedItemId(id)
@@ -24,7 +24,7 @@ const Home = ({ navigation }) => {
         navigation.setOptions({
             headerTitle: "Classes",
             headerRight: () => (
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <TouchableOpacity className='mr-4' onPress={() => setModalVisible(true)}>
                     <Ionicons name='add' size={25} color={'#000'} />
                 </TouchableOpacity>
             )
@@ -52,7 +52,7 @@ const Home = ({ navigation }) => {
             }
         }
         fetchClasses()
-    }, [classes])
+    }, [])
     const handleSubmit = async () => {
         if (!className.trim()) {
             alert('Please enter a class name');
@@ -132,11 +132,6 @@ const Home = ({ navigation }) => {
                 <Menu.Item title='Delete' onPress={() => deleteClass(item.id)} />
             </Menu>
         </TouchableOpacity>
-
-
-
-
-
     );
     const handleUpdateSubmit = async () => {
         if (!updateClassName.trim()) {
@@ -262,7 +257,7 @@ const Home = ({ navigation }) => {
                         keyExtractor={item => item.id}
                         renderItem={({ item, index }) => (
                             <RenderClass item={item} index={index} />
-                        )} 
+                        )}
                         className='mt-2 h-[92%]'
                     />
 

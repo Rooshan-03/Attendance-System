@@ -49,24 +49,48 @@ const Login = ({ navigation }) => {
   }
   const getDataFromRTDB = async () => {
     try {
-      const uid = auth.currentUser.uid
+      const uid = auth.currentUser.uid;
+      console.log("Logged-in UID:", uid);
+
       const db = getDatabase();
       const snapshot = await get(ref(db, 'Users'));
-      if (snapshot.exists()) {
-        const users = snapshot.val()
-        const user = Object.values(users).find(u => u.uid === uid)
-        if (user) {
-          storeDataInAsyncStorage(user)
-        }
+
+      if (!snapshot.exists()) {
+        console.log("Users node does NOT exist in RTDB");
+        return;
       }
+
+      const users = snapshot.val();
+      const user = users[uid];
+
+
+      if (user) {
+        await storeDataInAsyncStorage(user);
+      } else {
+        console.log("❌ No matching user found with uid inside Users node");
+      }
+
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
+
+
   const storeDataInAsyncStorage = async (user) => {
     try {
-      await AsyncStorage.setItem('user', JSON.stringify(user));
-      console.log("data fetched and stored", user)
+      console.log(user)
+      await AsyncStorage.setItem('user', JSON.stringify(
+        {
+          email: user.email,
+          name: user.name,
+          number: user.number
+        }
+      ));
+      console.log("data fetched and stored", {
+        email: user.email,
+        name: user.name,
+        number: user.number
+      })
     } catch (error) {
       console.log(error)
     }
