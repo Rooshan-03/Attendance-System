@@ -1,5 +1,5 @@
 import { ActivityIndicator, Alert, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from 'firebase.config';
@@ -17,39 +17,16 @@ const ClassData = ({ navigation }) => {
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [updateSubjectName, setUpdateSubjectName] = useState('')
     const [updateModalVisible, setUpdateModalVisible] = useState(false)
+    const [id, setId] = useState('')
     const db = getDatabase()
     //Getting ClassName as prop from Home Screen
     const { className, classId } = useRoute().params
 
+
     const openItemMenu = (id) => setSelectedItemId(id)
-    const closeItemMenu = () => setSelectedItemId(null)
-    const updateSubject = (item) => {
-        setSelectedItemId(item.id);
-        setUpdateSubjectName(item.subjectName);
-        setUpdateModalVisible(true);
+    const closeItemMenu = () => {
+        setSelectedItemId(null);
     };
-
-    const deleteSubject = async (subjectId) => {
-
-        Alert.alert('Warning', 'Are You sure You want to delete this subject?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel'
-
-                },
-                {
-                    text: 'Ok',
-                    onPress: async () => {
-                        const uid = auth.currentUser.uid
-                        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}`)
-                        await remove(deleteRef)
-                        setSubjects(prev => prev.filter(s => s.id !== subjectId));
-                    }
-                }
-            ]
-        )
-    }
     // fetching data in useEffexct Hook
     useEffect(() => {
         //fetching data from firebase
@@ -122,52 +99,79 @@ const ClassData = ({ navigation }) => {
             console.message(error)
         }
     }
-    const RenderSubjects = ({ item }) => (
-        <TouchableOpacity
-            className="mx-3 my-1 bg-white rounded-2xl shadow-md flex-row items-center p-3"
-            onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName, classId })}
-        >
-            <View className="w-8 h-8 bg-blue-100 rounded-full justify-center items-center mr-3">
-                <Ionicons name="book-outline" size={18} color="#2563EB" />
-            </View>
-
-            <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
-            </View>
-            <Menu
-                visible={selectedItemId == item.id}
-                onDismiss={closeItemMenu}
-                anchor={
-                    <TouchableOpacity onPress={() => openItemMenu(item.id)} className='pl-3 rounded-full w-10  h-7'>
-                        <Ionicons name="ellipsis-vertical" size={18} color="grey" />
-                    </TouchableOpacity>
-                }
+    const RenderSubjects = ({ item }) => {
+        const isMenuOpen = selectedItemId === item.id;
+        return (
+            <TouchableOpacity
+                className="mx-3 my-1 bg-white rounded-2xl shadow-md flex-row items-center p-3"
+                onPress={() => navigation.navigate('StudentsData', { subjectId: item.id, subjectName: item.subjectName, classId })}
             >
-                <Menu.Item title='Update' onPress={() => updateSubject(item)} />
-                <Menu.Item title='Delete' onPress={() => deleteSubject(item.id)} />
-            </Menu>
-        </TouchableOpacity>
-    );
+                <View className="w-8 h-8 bg-blue-100 rounded-full justify-center items-center mr-3">
+                    <Ionicons name="book-outline" size={18} color="#2563EB" />
+                </View>
 
+                <View className="flex-1">
+                    <Text className="text-lg font-semibold text-gray-800">{item.subjectName}</Text>
+                </View>
+                <Menu
+                    visible={isMenuOpen}
+                    onDismiss={closeItemMenu}
+                    anchor={
+                        <TouchableOpacity onPress={() => openItemMenu(item.id)} className='pl-3 rounded-full w-10  h-7'>
+                            <Ionicons name="ellipsis-vertical" size={18} color="grey" />
+                        </TouchableOpacity>
+                    }
+                >
+                    <Menu.Item title='Update' onPress={() => updateSubject(item)} />
+                    <Menu.Item title='Delete' onPress={() => deleteSubject(item.id)} />
+                </Menu>
+            </TouchableOpacity>
+        )
+    }
     const handleUpdateSubmit = async () => {
         if (!updateSubjectName.trim()) {
             alert('Please Enter Subject Name')
             return;
         }
-        console.log(selectedItemId, updateSubjectName)
+        console.log(id, updateSubjectName)
         const uid = auth.currentUser.uid
-        console.log(selectedItemId)
-        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${selectedItemId}`)
+        console.log(id)
+        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${id}`)
         await update(updateRef, { subjectName: updateSubjectName })
         setSubjects(prev =>
-            prev.map(s => s.id === selectedItemId ? { ...s, subjectName: updateSubjectName } : s)
+            prev.map(s => s.id === id ? { ...s, subjectName: updateSubjectName } : s)
         )
-        closeItemMenu()
-        setUpdateModalVisible(false)
+
         setUpdateSubjectName('')
         setUpdateModalVisible(false)
     }
+    const updateSubject = (item) => {
+        setId(item.id)
+        setUpdateSubjectName(item.subjectName)
+        closeItemMenu()
+        setUpdateModalVisible(true);
+    };
 
+    const deleteSubject = async (subjectId) => {
+        Alert.alert('Warning', 'Are You sure You want to delete this subject?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+
+                },
+                {
+                    text: 'Ok',
+                    onPress: async () => {
+                        const uid = auth.currentUser.uid
+                        const deleteRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}`)
+                        await remove(deleteRef)
+                        setSubjects(prev => prev.filter(s => s.id !== subjectId));
+                    }
+                }
+            ]
+        )
+    }
     return (
         <View className='flex-1'>
             <Modal

@@ -123,7 +123,7 @@ const Home = ({ navigation }) => {
                 visible={selectedItemId == item.id}
                 onDismiss={closeItemMenu}
                 anchor={
-                    <TouchableOpacity onPress={() => openItemMenu(item.id)} style={{ paddingLeft: 10 }}>
+                    <TouchableOpacity onPress={() => openItemMenu(item.id)} className='w-12 h-7 pl-4'>
                         <Ionicons name="ellipsis-vertical" size={18} color="grey" />
                     </TouchableOpacity>
                 }

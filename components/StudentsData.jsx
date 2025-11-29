@@ -19,6 +19,7 @@ const StudentsData = ({ navigation }) => {
     const [updateStudentName, setUpdateStudentName] = useState('')
     const [updateStudentRollNo, setUpdateStudentRollNo] = useState('')
     const [updateModalVisible, setUpdateModalVisible] = useState(false)
+    const [selectdId,setId] = useState('')
     //getting id and subject name using props from ClassDAta Screen
     const { classId, subjectId, subjectName } = useRoute().params
     const db = getDatabase()
@@ -98,6 +99,8 @@ const StudentsData = ({ navigation }) => {
         }
     };
     const updateStudent = async (student) => {
+        setId(student.id)
+        closeItemMenu()
         setUpdateStudentName(student.Name);
         setUpdateStudentRollNo(student.RollNo);
         setUpdateModalVisible(true);
@@ -159,27 +162,25 @@ const StudentsData = ({ navigation }) => {
             return;
         }
         const nameExists = students.some(
-            s => s.Name.toLowerCase() === updateStudentName.trim().toLowerCase() && s.id !== selectedItemId
+            s => s.Name.toLowerCase() === updateStudentName.trim().toLowerCase() && s.id !== selectdId
         );
         if (nameExists) {
             alert('Student with this name already exists');
             return;
         }
         const rollNoExists = students.some(
-            s => s.RollNo.toLowerCase() === updateStudentRollNo.trim().toLowerCase() && s.id !== selectedItemId
+            s => s.RollNo.toLowerCase() === updateStudentRollNo.trim().toLowerCase() && s.id !== selectdId
         );
         if (rollNoExists) {
             alert('Student with this Roll No exists');
             return;
         }
 
-        console.log(selectedItemId, updateStudentName, updateStudentRollNo)
         const uid = auth.currentUser.uid
-        console.log(selectedItemId)
-        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students/${selectedItemId}`)
+        const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${subjectId}/Students/${selectdId}`)
         await update(updateRef, { Name: updateStudentName, RollNo: updateStudentRollNo })
         setStudents(prev =>
-            prev.map(s => s.id === selectedItemId ? { ...s, Name: updateStudentName, RollNo: updateStudentRollNo } : s)
+            prev.map(s => s.id === selectdId ? { ...s, Name: updateStudentName, RollNo: updateStudentRollNo } : s)
         )
         closeItemMenu()
         setUpdateModalVisible(false)
@@ -234,11 +235,7 @@ const StudentsData = ({ navigation }) => {
                         <View className='flex justify-center items-center h-[90%]'>
                             <Text className='text-red-600 font-extrabold'>No students</Text>
                         </View>
-                        <View className='absolute bottom-[10%] right-3 p-3'>
-                            <TouchableOpacity className="w-14 h-14 bg-blue-400 rounded-full shadow-lg flex justify-center items-center" onPress={() => setModalVisible(true)}>
-                                <Ionicons name='add-sharp' size={20} color={'#fff'} />
-                            </TouchableOpacity>
-                        </View>
+
                     </View>
                 ) : (
                     <View className='flex-1 items-center justify-center'>
