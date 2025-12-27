@@ -4,7 +4,7 @@ import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawe
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth } from 'firebase.config';
+import { auth  } from '../firebase.config.js';
 import { ActivityIndicator } from 'react-native-paper';
 import useUserLoggedInState from 'zustand/store';
 

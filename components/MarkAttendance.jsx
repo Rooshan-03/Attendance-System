@@ -2,7 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator
 import React, { useCallback, useMemo, useState } from 'react'
 import { get, getDatabase, ref, update } from 'firebase/database';
 import { useFocusEffect, useRoute } from '@react-navigation/native'
-import { auth } from 'firebase.config'
+import { auth } from '../firebase.config.js';
 import RadioButton from './RadioButton'
 import { Ionicons } from '@expo/vector-icons';
 

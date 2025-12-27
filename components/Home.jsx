@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, Modal, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { auth } from 'firebase.config';
+import { auth } from '../firebase.config.js';
 import { getDatabase, ref, push, set, get, update, remove } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 import { Menu } from 'react-native-paper';

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TextInput } from 'react-native-gesture-handler'
 import { getDatabase, ref, update } from 'firebase/database'
-import { auth } from 'firebase.config'
+import { auth } from '../firebase.config.js';
 import { ActivityIndicator } from 'react-native-paper'
 
 const ProfileScreen = () => {

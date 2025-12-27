@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from 'react'
 import { View, Text, FlatList, Button, Modal, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import { useEffect, useState } from 'react'
-import { auth } from 'firebase.config'
+import { auth } from '../firebase.config.js';
 import { get, getDatabase, ref, push, set, update, remove } from 'firebase/database'
 import { useRoute } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'

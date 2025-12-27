@@ -2,7 +2,7 @@ import { ActivityIndicator, Alert, FlatList, Modal, Text, TextInput, TouchableOp
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { auth } from 'firebase.config';
+import { auth } from '../firebase.config.js';
 import { get, getDatabase, push, ref, remove, set, update } from 'firebase/database';
 import { Menu } from 'react-native-paper';
 

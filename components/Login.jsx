@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import AppIcon from '../assets/AppIcon.jpeg';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from 'firebase.config';
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase.config.js';
 import userLoggedInState from 'zustand/store';
 import { get, getDatabase, ref } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -73,7 +73,7 @@ const Login = ({ navigation }) => {
       if (user) {
         await storeDataInAsyncStorage(user);
       } else {
-        console.log("❌ No matching user found with uid inside Users node");
+        console.log("No matching user found with uid inside Users node");
       }
 
     } catch (error) {
@@ -99,6 +99,16 @@ const Login = ({ navigation }) => {
       })
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  //Change password
+  const changePassword = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      Alert.alert("Email Sent", "A password reset link has been sent to your email.");
+    } catch (error) {
+      Alert.alert('Error', 'Error Occured, Try Again Later')
     }
   }
   return (
@@ -129,7 +139,7 @@ const Login = ({ navigation }) => {
 
         <Text className="text-gray-700 mb-1">Password</Text>
 
-        <View className="border border-gray-300 rounded-lg px-2 mb-6 w-full flex-row items-center">
+        <View className="border border-gray-300 rounded-lg px-2 w-full flex-row items-center">
           <TextInput
             className="flex-1"
             placeholder="Enter password"
@@ -146,7 +156,11 @@ const Login = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
-
+        <TouchableOpacity className='mb-4 flex items-end' onPress={changePassword}>
+          <Text className='text-blue-500'>
+            Forgot Password?
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           className="bg-blue-500 rounded-lg p-3 w-full"

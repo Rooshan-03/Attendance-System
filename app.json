@@ -3,20 +3,11 @@
     "name": "Attendly",
     "slug": "my-expo-app",
     "version": "1.0.0",
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "experiments": {
-      "tsconfigPaths": true
-    },
-    "plugins": [
-      "expo-font"
-    ],
     "orientation": "portrait",
-    "icon": "./assets/AppIcon.jpeg",
+    "icon": "./assets/AppIcon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/AppIcon.jpeg",
+      "image": "./assets/AppIcon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -29,16 +20,22 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/AppIcon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.rooshan.attendly"
     },
+    "owner": "shani_03",
     "extra": {
       "eas": {
-        "projectId": "66299944-99de-4210-8f9e-9784f9b0eaea"
+        "projectId": "e5524f68-7b0a-4c89-a1f6-86b17b4bc745"
       }
     },
-    "owner": "shani_03"
+    "plugins": [
+      "expo-font"
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    }
   }
 }
