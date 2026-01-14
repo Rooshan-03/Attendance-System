@@ -54,8 +54,7 @@ const ClassData = ({ navigation }) => {
                 }
             } catch (error) {
                 setLoading(false)
-
-                console.log('Error Fetcing Subjects', error)
+                Alert.alert('Error', 'Unkwon Error Occured Whlie fetching subjects ')
             }
         }
         fetchSubjects();
@@ -133,9 +132,7 @@ const ClassData = ({ navigation }) => {
             alert('Please Enter Subject Name')
             return;
         }
-        console.log(id, updateSubjectName)
         const uid = auth.currentUser.uid
-        console.log(id)
         const updateRef = ref(db, `Users/${uid}/Classes/${classId}/Subjects/${id}`)
         await update(updateRef, { subjectName: updateSubjectName })
         setSubjects(prev =>

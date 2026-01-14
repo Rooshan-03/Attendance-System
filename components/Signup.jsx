@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import AppIcon from '../assets/AppIcon.jpeg';
+import AppIcon from '../assets/AppIcon.png';
 import { auth } from '../firebase.config';
 import { getDatabase, ref, set } from 'firebase/database';
 
@@ -74,8 +74,7 @@ const Signup = ({ navigation }) => {
       Alert.alert('Verify Email', "PLease Verify Your email to proceed")
       navigation.navigate('Login')
     } catch (error) {
-      console.log('Error: ', error.message)
-      Alert.alert('Error')
+      Alert.alert('Error','Cant Update User Data')
       setLoading(false)
     }
   }

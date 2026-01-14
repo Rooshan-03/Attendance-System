@@ -19,7 +19,7 @@ const StudentsData = ({ navigation }) => {
     const [updateStudentName, setUpdateStudentName] = useState('')
     const [updateStudentRollNo, setUpdateStudentRollNo] = useState('')
     const [updateModalVisible, setUpdateModalVisible] = useState(false)
-    const [selectdId,setId] = useState('')
+    const [selectdId, setId] = useState('')
     //getting id and subject name using props from ClassDAta Screen
     const { classId, subjectId, subjectName } = useRoute().params
     const db = getDatabase()
@@ -95,7 +95,8 @@ const StudentsData = ({ navigation }) => {
             setLoadingAddMore(false)
 
         } catch (error) {
-            console.log('Error adding student:', error);
+            Alert.alert('Error', ` Unable to add student's details`)
+
         }
     };
     const updateStudent = async (student) => {

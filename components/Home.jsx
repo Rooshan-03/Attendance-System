@@ -75,7 +75,7 @@ const Home = ({ navigation }) => {
             setClasses(prev => [...prev, { id: newClassRef.key, ...newClassData }]);
             setClassName('');
         } catch (error) {
-            console.log('Error adding class:', error);
+            Alert.alert('Error', 'Error Adding Class')
         } finally {
             setLoadingSubmit(false);
             setLoadingAddMore(false);
@@ -138,9 +138,7 @@ const Home = ({ navigation }) => {
             alert('Please Enter Class Name')
             return;
         }
-        console.log(selectedItemId, updateClassName)
         const uid = auth.currentUser.uid
-        console.log(selectedItemId)
         const updateRef = ref(db, `Users/${uid}/Classes/${classItemId}`)
         await update(updateRef, { className: updateClassName })
         setClasses(prev =>

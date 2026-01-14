@@ -30,7 +30,6 @@ const CustomDrawerContent = (props) => {
             await auth.signOut();
             await AsyncStorage.removeItem('user')
             setUserState(false)
-            console.log(checkUserState())
             navigation.reset({
               index: 0,
               routes: [{ name: "Login" }],
@@ -47,7 +46,6 @@ const CustomDrawerContent = (props) => {
         const stored = await AsyncStorage.getItem('user');
         if (stored) {
           const user = JSON.parse(stored);
-          console.log(user)
           setStoredUser(user)
           setLoading(false)
         }

@@ -57,7 +57,7 @@ const ProfileScreen = () => {
           setLoading(false)
         }
       } catch (e) {
-        console.log(e)
+        Alert.alert('Error', `Error fetching user's data`)
       }
     };
 
@@ -68,7 +68,7 @@ const ProfileScreen = () => {
       {
         loading ? (
           <View>
-            <ActivityIndicator size={'large'} color='blue'/>
+            <ActivityIndicator size={'large'} color='blue' />
           </View>
         ) : (
           <View className='flex items-center'>

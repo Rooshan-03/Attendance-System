@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
-import AppIcon from '../assets/AppIcon.jpeg';
+import AppIcon from '../assets/AppIcon.png';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase.config.js';
 import userLoggedInState from 'zustand/store';
@@ -56,13 +56,11 @@ const Login = ({ navigation }) => {
   const getDataFromRTDB = async () => {
     try {
       const uid = auth.currentUser.uid;
-      console.log("Logged-in UID:", uid);
 
       const db = getDatabase();
       const snapshot = await get(ref(db, 'Users'));
 
       if (!snapshot.exists()) {
-        console.log("Users node does NOT exist in RTDB");
         return;
       }
 
@@ -73,11 +71,11 @@ const Login = ({ navigation }) => {
       if (user) {
         await storeDataInAsyncStorage(user);
       } else {
-        console.log("No matching user found with uid inside Users node");
+        Alert.alert('Error', 'Failed to save user details')
       }
 
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', `Error fetching user's data`)
     }
   };
 
@@ -92,13 +90,9 @@ const Login = ({ navigation }) => {
           number: user.number
         }
       ));
-      console.log("data fetched and stored", {
-        email: user.email,
-        name: user.name,
-        number: user.number
-      })
     } catch (error) {
-      console.log(error)
+      Alert.alert('Error', `Error updating user's data`)
+
     }
   }
 

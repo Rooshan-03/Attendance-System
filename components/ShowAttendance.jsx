@@ -81,7 +81,6 @@ const ShowAttendance = ({ navigation }) => {
                 UTI: 'com.microsoft.excel.xlsx',
             });
         } catch (error) {
-            console.log(error);
             Alert.alert('Error', 'Failed to export Excel file');
         }
     };
